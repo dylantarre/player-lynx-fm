@@ -1,32 +1,28 @@
 #!/bin/sh
 
-# Replace environment variables in the built app
-# This script runs at container startup to inject environment variables
+# This script injects environment variables into the static env.js file
+# It runs when the container starts
 
 # The directory containing the built app
 APP_DIR=/usr/share/nginx/html
 
-# Create a temporary file to store environment variables
-env_file="$APP_DIR/env-config.js"
-
-# Create or update the env-config.js file
-echo "window.__env = {" > $env_file
-echo "  VITE_SUPABASE_URL: '${VITE_SUPABASE_URL:-}'," >> $env_file
-echo "  VITE_SUPABASE_ANON_KEY: '${VITE_SUPABASE_ANON_KEY:-}'," >> $env_file
-echo "  VITE_API_BASE_URL: '${VITE_API_BASE_URL:-"/api"}'," >> $env_file
-echo "};" >> $env_file
-
-# Find all JS files and update them
-find $APP_DIR -type f -name "*.js" -o -name "*.html" | while read -r file; do
-  echo "Processing: $file"
+# Update env.js with actual environment variables
+if [ -f "$APP_DIR/env.js" ]; then
+  echo "Injecting environment variables into env.js..."
   
-  # For HTML files, inject the env-config.js script
-  if [[ "$file" == *.html ]]; then
-    sed -i 's|</head>|<script src="/env-config.js"></script></head>|g' "$file"
-  fi
-done
-
-echo "Environment variables have been injected"
+  # Make a copy of the original file
+  cp "$APP_DIR/env.js" "$APP_DIR/env.js.template"
+  
+  # Replace placeholders with actual values
+  cat "$APP_DIR/env.js.template" | \
+    sed "s|__SUPABASE_URL__|${VITE_SUPABASE_URL:-}|g" | \
+    sed "s|__SUPABASE_ANON_KEY__|${VITE_SUPABASE_ANON_KEY:-}|g" | \
+    sed "s|__API_BASE_URL__|${VITE_API_BASE_URL:-/api}|g" > "$APP_DIR/env.js"
+  
+  echo "Environment variables successfully injected"
+else
+  echo "Warning: $APP_DIR/env.js not found"
+fi
 
 # Start nginx
 exec "$@"
