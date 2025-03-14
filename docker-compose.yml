@@ -1,20 +1,17 @@
-version: '3.8'
 services:
   lynx-fm:
     build:
       context: .
       dockerfile: Dockerfile
-    secrets:
-      - VITE_SUPABASE_URL
-      - VITE_SUPABASE_ANON_KEY
-      - VITE_API_BASE_URL
     container_name: lynx-fm
     restart: unless-stopped
     ports:
       - "8080:80"
-    # (Optional) If nothing at runtime uses these variables, you can remove or comment them out:
-    # environment:
-    #   - NODE_ENV=production
+    environment:
+      - NODE_ENV=production
+      - VITE_SUPABASE_URL=${VITE_SUPABASE_URL}
+      - VITE_SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY}
+      - VITE_API_BASE_URL=${VITE_API_BASE_URL:-/api}
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
       interval: 30s
@@ -31,11 +28,3 @@ services:
 networks:
   lynx-network:
     driver: bridge
-
-secrets:
-  VITE_SUPABASE_URL:
-    file: ./secrets/VITE_SUPABASE_URL
-  VITE_SUPABASE_ANON_KEY:
-    file: ./secrets/VITE_SUPABASE_ANON_KEY
-  VITE_API_BASE_URL:
-    file: ./secrets/VITE_API_BASE_URL
