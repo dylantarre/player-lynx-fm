@@ -5,8 +5,9 @@ services:
       dockerfile: Dockerfile
     container_name: lynx-fm
     restart: unless-stopped
-    ports:
-      - "80:80"
+    # Using expose instead of ports for Zero Trust architecture
+    expose:
+      - "80"
     environment:
       - NODE_ENV=production
       - VITE_SUPABASE_URL=your_supabase_url_here
