@@ -83,6 +83,27 @@ docker push your-registry/lynx-fm:latest
 | VITE_SUPABASE_ANON_KEY | Your Supabase anonymous key | Yes |
 | VITE_API_BASE_URL | URL of the Go-Lynx server | No (defaults to http://go.lynx.fm:3500) |
 
+## Secrets Management
+
+LynxFM uses Docker secrets for secure environment variable management. To set up:
+
+1. Create a `secrets` directory at the root of the project:
+```bash
+mkdir secrets
+```
+
+2. Copy the example secrets and update with your values:
+```bash
+cp -r secrets.example/* secrets/
+```
+
+3. Update each secret file with your actual values:
+- `secrets/VITE_SUPABASE_URL`: Your Supabase project URL
+- `secrets/VITE_SUPABASE_ANON_KEY`: Your Supabase anonymous key
+- `secrets/VITE_API_BASE_URL`: Your API base URL (defaults to /api)
+
+Note: The `secrets` directory is gitignored for security. Never commit actual secrets to version control.
+
 ## Security Notes
 
 - **NEVER commit your .env file to version control**
