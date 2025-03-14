@@ -1,11 +1,11 @@
-import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
+import React from 'react';
+import ReactDOM from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
-import './env-check.ts'; // Import environment check script
+// Removed environment check import since config.js is now handling this
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
     <App />
-  </StrictMode>
+  </React.StrictMode>,
 );
