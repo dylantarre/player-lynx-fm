@@ -2,7 +2,7 @@
 
 This guide explains how to build and deploy the LynxFM application using Docker and Portainer.
 
-## Prerequisites
+## Prerequisite
 
 - Docker installed on your build machine
 - Access to a Portainer instance
@@ -77,32 +77,24 @@ docker push your-registry/lynx-fm:latest
 
 ## Environment Variables
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| VITE_SUPABASE_URL | Your Supabase project URL | Yes |
-| VITE_SUPABASE_ANON_KEY | Your Supabase anonymous key | Yes |
-| VITE_API_BASE_URL | URL of the Go-Lynx server | No (defaults to http://go.lynx.fm:3500) |
+LynxFM requires the following environment variables:
 
-## Secrets Management
+- `VITE_SUPABASE_URL`: Your Supabase project URL
+- `VITE_SUPABASE_ANON_KEY`: Your Supabase anonymous key
+- `VITE_API_BASE_URL`: API base URL (defaults to `/api`)
 
-LynxFM uses Docker secrets for secure environment variable management. To set up:
+### Setting Environment Variables in Portainer
 
-1. Create a `secrets` directory at the root of the project:
-```bash
-mkdir secrets
-```
+1. In your Portainer stack configuration, add the environment variables under the "Environment" section:
+   ```
+   VITE_SUPABASE_URL=https://your-project.supabase.co
+   VITE_SUPABASE_ANON_KEY=your-anon-key
+   VITE_API_BASE_URL=/api
+   ```
 
-2. Copy the example secrets and update with your values:
-```bash
-cp -r secrets.example/* secrets/
-```
+2. These variables will be injected into the container at runtime and used to generate the `config.js` file.
 
-3. Update each secret file with your actual values:
-- `secrets/VITE_SUPABASE_URL`: Your Supabase project URL
-- `secrets/VITE_SUPABASE_ANON_KEY`: Your Supabase anonymous key
-- `secrets/VITE_API_BASE_URL`: Your API base URL (defaults to /api)
-
-Note: The `secrets` directory is gitignored for security. Never commit actual secrets to version control.
+3. You can verify the environment variables are loaded correctly by checking the container logs after deployment.
 
 ## Security Notes
 
