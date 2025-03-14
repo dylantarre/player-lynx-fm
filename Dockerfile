@@ -13,14 +13,10 @@ RUN npm ci
 # Copy the rest of the application
 COPY . .
 
-# Create an env-config.js file that will be included in the build
-RUN echo "window.__env = {" > public/env-config.js && \
-    echo "  VITE_SUPABASE_URL: '${VITE_SUPABASE_URL}'," >> public/env-config.js && \
-    echo "  VITE_SUPABASE_ANON_KEY: '${VITE_SUPABASE_ANON_KEY}'," >> public/env-config.js && \
-    echo "  VITE_API_BASE_URL: '${VITE_API_BASE_URL:-/api}'," >> public/env-config.js && \
-    echo "};" >> public/env-config.js
-
-# Build the application
+# Build the application with ARGs that will be used during build time
+ARG VITE_SUPABASE_URL
+ARG VITE_SUPABASE_ANON_KEY
+ARG VITE_API_BASE_URL
 RUN npm run build
 
 # Production stage
@@ -32,9 +28,14 @@ COPY --from=build /app/dist /usr/share/nginx/html
 # Copy custom nginx config
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Copy environment setup script
-COPY env.sh /docker-entrypoint.d/40-env.sh
-RUN chmod +x /docker-entrypoint.d/40-env.sh
+# Create a script to replace env variables at runtime
+RUN echo '#!/bin/sh' > /docker-entrypoint.d/40-env.sh && \
+    echo 'echo "window.ENV = {" > /usr/share/nginx/html/env.js' >> /docker-entrypoint.d/40-env.sh && \
+    echo 'echo "  VITE_SUPABASE_URL: \"$VITE_SUPABASE_URL\"," >> /usr/share/nginx/html/env.js' >> /docker-entrypoint.d/40-env.sh && \
+    echo 'echo "  VITE_SUPABASE_ANON_KEY: \"$VITE_SUPABASE_ANON_KEY\"," >> /usr/share/nginx/html/env.js' >> /docker-entrypoint.d/40-env.sh && \
+    echo 'echo "  VITE_API_BASE_URL: \"$VITE_API_BASE_URL\"" >> /usr/share/nginx/html/env.js' >> /docker-entrypoint.d/40-env.sh && \
+    echo 'echo "};" >> /usr/share/nginx/html/env.js' >> /docker-entrypoint.d/40-env.sh && \
+    chmod +x /docker-entrypoint.d/40-env.sh
 
 # Expose port
 EXPOSE 80
