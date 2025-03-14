@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  lynx-fm:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: lynx-fm:latest
+    container_name: lynx-fm
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      - NODE_ENV=production
+      - VITE_SUPABASE_URL=your_supabase_url_here
+      - VITE_SUPABASE_ANON_KEY=your_supabase_anon_key_here
+      - VITE_API_BASE_URL=http://go.lynx.fm:3500
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - lynx-network
+
+networks:
+  lynx-network:
+    driver: bridge
