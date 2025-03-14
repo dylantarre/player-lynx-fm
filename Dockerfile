@@ -28,18 +28,12 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=builder /app/dist /usr/share/nginx/html
 
 # Create entrypoint script
-RUN echo '#!/bin/sh\n\
-# Replace environment variables in index.html\n\
-envsubst "\${VITE_SUPABASE_URL} \${VITE_SUPABASE_ANON_KEY} \${VITE_API_BASE_URL}" < /usr/share/nginx/html/index.html > /usr/share/nginx/html/index.html.tmp\n\
-mv /usr/share/nginx/html/index.html.tmp /usr/share/nginx/html/index.html\n\
-\n\
-# Start Nginx\n\
-exec nginx -g "daemon off;"' > /docker-entrypoint.sh && \
-chmod +x /docker-entrypoint.sh
+COPY docker-entrypoint.sh /
+RUN chmod +x /docker-entrypoint.sh
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
     CMD wget --quiet --tries=1 --spider http://localhost:80/ || exit 1
 
 # Start with our entrypoint script
-CMD ["/docker-entrypoint.sh"]
+ENTRYPOINT ["/docker-entrypoint.sh"]
