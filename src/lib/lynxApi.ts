@@ -1,6 +1,7 @@
 import { supabase } from './supabase';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://go.lynx.fm:3500';
+// Use the Nginx proxy for API requests
+const API_BASE_URL = '/api';
 
 // Define types
 export interface Track {
