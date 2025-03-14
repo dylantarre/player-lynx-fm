@@ -5,20 +5,27 @@ import { getEnvVar } from './env';
 const supabaseUrl = getEnvVar('VITE_SUPABASE_URL');
 const supabaseAnonKey = getEnvVar('VITE_SUPABASE_ANON_KEY');
 
-// Create Supabase client with simplified configuration
+// Create Supabase client with minimal configuration for Zero Trust
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
-    persistSession: false, // As per project requirements
-    autoRefreshToken: true,
-    detectSessionInUrl: false
+    persistSession: false,
+    detectSessionInUrl: false,
+    autoRefreshToken: false,
+    storage: undefined
   }
 });
 
-// Simplified interface for authentication as per project memory
+// Simplified interface for authentication as per project requirements
 export const lynxSupabase = {
   async signInWithPassword(email: string, password: string) {
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+        options: {
+          captchaToken: undefined // Disable captcha for Zero Trust
+        }
+      });
       return { success: !error, user: data?.user || null, error };
     } catch (error) {
       console.error('Authentication error:', error);
@@ -32,7 +39,13 @@ export const lynxSupabase = {
 
   async signUp(email: string, password: string) {
     try {
-      const { data, error } = await supabase.auth.signUp({ email, password });
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          captchaToken: undefined // Disable captcha for Zero Trust
+        }
+      });
       return { success: !error, user: data?.user || null, error };
     } catch (error) {
       console.error('Sign up error:', error);
