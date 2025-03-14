@@ -1,7 +1,7 @@
 import { supabase } from './supabase';
 
 // Use direct API URL for development, or the config value for production
-const API_BASE_URL = window.LYNX_CONFIG?.apiBaseUrl || 'http://go.lynx.fm:3500';
+const API_BASE_URL = window.LYNX_CONFIG?.apiBaseUrl || '/api';
 
 console.log('Using API base URL:', API_BASE_URL);
 
@@ -42,6 +42,7 @@ interface ApiError {
 // Helper function to handle fetch errors
 async function fetchWithErrorHandling(url: string, options: RequestInit = {}): Promise<Response> {
   try {
+    console.log(`Fetching from: ${url}`);
     const response = await fetch(url, {
       ...options,
       headers: {
@@ -51,18 +52,25 @@ async function fetchWithErrorHandling(url: string, options: RequestInit = {}): P
     });
 
     if (!response.ok) {
-      const errorData: ApiError = await response.json().catch(() => ({
-        message: 'Unknown error occurred',
-        status: response.status
-      }));
+      let errorMessage = `HTTP error! status: ${response.status}`;
+      try {
+        const errorData: ApiError = await response.json();
+        errorMessage = errorData.message || errorMessage;
+      } catch {
+        // If we can't parse the error as JSON, just use the status message
+      }
       
-      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      console.error('API response error:', errorMessage, response.status);
+      throw new Error(errorMessage);
     }
 
     return response;
   } catch (error) {
     console.error('API fetch error:', error);
-    throw new Error('Network error when connecting to Lynx API. Please check your connection and try again.');
+    if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+      throw new Error('Network error when connecting to Lynx API. Please check your connection and try again.');
+    }
+    throw error;
   }
 }
 
@@ -83,10 +91,25 @@ export const lynxApi = {
   // Public endpoints (no auth required)
   async healthCheck(): Promise<boolean> {
     try {
-      const response = await fetchWithErrorHandling(`${API_BASE_URL}/health`);
-      return response.ok;
+      console.log(`Checking API health at: ${API_BASE_URL}/health`);
+      const response = await fetch(`${API_BASE_URL}/health`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+      
+      console.log('Health check response:', response.status, response.statusText);
+      
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => 'No response body');
+        console.error('Health check failed with status:', response.status, errorText);
+        return false;
+      }
+      
+      return true;
     } catch (error) {
-      console.error('Health check failed:', error);
+      console.error('Health check failed with exception:', error);
       return false;
     }
   },

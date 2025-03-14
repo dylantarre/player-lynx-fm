@@ -180,8 +180,8 @@ export function MusicPlayer() {
         setAudioObjectUrl(null);
       }
 
-      // Get the API base URL from config or use the default
-      const apiBaseUrl = window.LYNX_CONFIG?.apiBaseUrl || 'http://go.lynx.fm:3500';
+      // Get the API base URL from config
+      const apiBaseUrl = window.LYNX_CONFIG?.apiBaseUrl || '/api';
       
       // Log the current origin for CORS debugging
       console.log('Current origin:', window.location.origin);
@@ -205,10 +205,92 @@ export function MusicPlayer() {
         throw new Error('Authentication required to play audio');
       }
 
-      // Use a static test audio source if available
-      const useTestAudio = true; // Set to false to use the real API
+      // Use a test audio source if we're having issues with the API
+      // Set to false to always try the real API first
+      const useTestAudio = false;
+      let useRealApi = true;
       
-      if (useTestAudio) {
+      // First try the real API unless we're explicitly using test audio
+      if (!useTestAudio) {
+        try {
+          // Continue with real API
+          const trackUrl = `${apiBaseUrl}/tracks/${trackId}`;
+          console.log('Using track URL:', trackUrl);
+          
+          // Create a fetch request to get the audio blob with proper headers
+          console.log('Fetching audio with authentication token');
+          const response = await fetch(trackUrl, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Accept': 'audio/mpeg, audio/mp3, audio/*'
+            }
+          });
+          
+          if (!response.ok) {
+            console.error('Error fetching audio:', response.status, response.statusText);
+            const errorText = await response.text();
+            console.error('Error response:', errorText);
+            throw new Error(`Failed to fetch audio: ${response.status} ${response.statusText}`);
+          }
+          
+          console.log('Audio response status:', response.status);
+          console.log('Audio response type:', response.headers.get('content-type'));
+          
+          // Get the blob
+          const audioBlob = await response.blob();
+          console.log('Audio blob size:', audioBlob.size, 'bytes');
+          console.log('Audio blob type:', audioBlob.type);
+          
+          if (audioBlob.size === 0) {
+            throw new Error('Received empty audio blob');
+          }
+          
+          // Create an object URL from the blob
+          const objectUrl = URL.createObjectURL(audioBlob);
+          setAudioObjectUrl(objectUrl);
+          
+          // Update current track info
+          setCurrentTrack({
+            id: trackId,
+            title: trackId.charAt(0).toUpperCase() + trackId.slice(1).replace('!', ''),
+            artist: 'Lynx FM',
+            url: objectUrl
+          });
+          
+          // Set the audio source and play
+          if (audioRef.current) {
+            console.log('Setting audio source to blob URL:', objectUrl);
+            audioRef.current.src = objectUrl;
+            audioRef.current.load();
+            
+            // Play the audio with a small delay to ensure loading
+            setTimeout(() => {
+              if (audioRef.current) {
+                console.log('Attempting to play audio');
+                const playPromise = audioRef.current.play();
+                if (playPromise !== undefined) {
+                  playPromise.then(() => {
+                    console.log('Audio playback started successfully');
+                    setIsPlaying(true);
+                  }).catch(error => {
+                    console.error('Error playing audio:', error);
+                    setIsPlaying(false);
+                    useRealApi = false; // Fall back to test audio
+                  });
+                }
+              }
+            }, 200);
+          }
+        } catch (error) {
+          console.error('Error with real API, falling back to test audio:', error);
+          useRealApi = false; // Fall back to test audio
+        }
+      } else {
+        useRealApi = false; // Skip real API if useTestAudio is true
+      }
+      
+      // If real API failed or we're explicitly using test audio, use test audio
+      if (!useRealApi) {
         // List of test audio files that are known to work
         const testAudioSources = [
           'https://file-examples.com/storage/fee788afd563954e0d26a49/2017/11/file_example_MP3_700KB.mp3',
@@ -218,26 +300,6 @@ export function MusicPlayer() {
         // Select a test audio source
         const testAudioUrl = testAudioSources[0];
         console.log('Using test audio source:', testAudioUrl);
-        
-        // Create audio element
-        const audio = new Audio(testAudioUrl);
-        
-        // Set up detailed error handling
-        audio.onerror = (e) => {
-          console.log('Test audio error event:', e);
-          console.log('Test audio error object:', audio.error);
-          if (audio.error) {
-            console.error('Test audio error code:', audio.error.code);
-            console.error('Test audio error message:', audio.error.message);
-          }
-        };
-        
-        audio.oncanplay = () => {
-          console.log('Test audio can play');
-          audio.play().catch(err => {
-            console.error('Test audio play error:', err);
-          });
-        };
         
         // Update current track info with test audio
         setCurrentTrack({
@@ -261,120 +323,6 @@ export function MusicPlayer() {
             }
           }, 200);
         }
-        
-        return; // Skip the rest of the function when using test audio
-      }
-      
-      // Continue with real API if not using test audio
-      const trackUrl = `${apiBaseUrl}/tracks/${trackId}`;
-      console.log('Using direct track URL:', trackUrl);
-      
-      // Create a direct audio element with authentication
-      const audio = new Audio();
-      
-      // Set up audio element event handlers with detailed logging
-      audio.onerror = (e) => {
-        console.log('Audio error event:', e);
-        if (audio.error) {
-          console.error('Audio error code:', audio.error.code);
-          console.error('Audio error message:', audio.error.message);
-        }
-      };
-      
-      audio.oncanplay = () => {
-        console.log('Audio can play now');
-      };
-      
-      // Create a fetch request to get the audio blob with proper headers
-      console.log('Fetching audio with authentication token');
-      const response = await fetch(trackUrl, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Accept': 'audio/mpeg, audio/mp3, audio/*'
-        }
-      });
-      
-      if (!response.ok) {
-        console.error('Error fetching audio:', response.status, response.statusText);
-        const errorText = await response.text();
-        console.error('Error response:', errorText);
-        throw new Error(`Failed to fetch audio: ${response.status} ${response.statusText}`);
-      }
-      
-      console.log('Audio response status:', response.status);
-      console.log('Audio response type:', response.headers.get('content-type'));
-      
-      // Get the blob
-      const audioBlob = await response.blob();
-      console.log('Audio blob size:', audioBlob.size, 'bytes');
-      console.log('Audio blob type:', audioBlob.type);
-      
-      if (audioBlob.size === 0) {
-        throw new Error('Received empty audio blob');
-      }
-      
-      // Create an object URL from the blob
-      const objectUrl = URL.createObjectURL(audioBlob);
-      setAudioObjectUrl(objectUrl);
-      
-      // Update current track info
-      setCurrentTrack({
-        id: trackId,
-        title: trackId.charAt(0).toUpperCase() + trackId.slice(1).replace('!', ''),
-        artist: 'Lynx FM',
-        url: objectUrl
-      });
-      
-      // Set the audio source and play
-      if (audioRef.current) {
-        console.log('Setting audio source to blob URL:', objectUrl);
-        audioRef.current.src = objectUrl;
-        audioRef.current.load();
-        
-        // Add detailed error logging
-        const handleAudioError = (e: Event) => {
-          console.log('Audio ref error event:', e);
-          if (audioRef.current && audioRef.current.error) {
-            console.error('Audio ref error code:', audioRef.current.error.code);
-            console.error('Audio ref error message:', audioRef.current.error.message);
-            
-            // Try fallback method
-            console.log('Trying fallback audio playback method');
-            const fallbackAudio = new Audio(objectUrl);
-            fallbackAudio.onerror = (fallbackErr) => {
-              console.error('Fallback audio error:', fallbackErr);
-            };
-            fallbackAudio.oncanplay = () => {
-              console.log('Fallback audio can play');
-              fallbackAudio.play().catch(err => {
-                console.error('Fallback audio play error:', err);
-              });
-            };
-            fallbackAudio.load();
-          }
-        };
-        
-        // Remove previous error listener if exists
-        audioRef.current.removeEventListener('error', handleAudioError as EventListener);
-        // Add error listener
-        audioRef.current.addEventListener('error', handleAudioError as EventListener);
-        
-        // Play the audio with a small delay to ensure loading
-        setTimeout(() => {
-          if (audioRef.current) {
-            console.log('Attempting to play audio');
-            const playPromise = audioRef.current.play();
-            if (playPromise !== undefined) {
-              playPromise.then(() => {
-                console.log('Audio playback started successfully');
-                setIsPlaying(true);
-              }).catch(error => {
-                console.error('Error playing audio:', error);
-                setIsPlaying(false);
-              });
-            }
-          }
-        }, 200);
       }
     } catch (error) {
       console.error('Error loading track:', error);
