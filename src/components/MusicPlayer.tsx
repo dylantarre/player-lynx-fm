@@ -183,9 +183,9 @@ export function MusicPlayer() {
       // Get the API base URL from config or use the default
       const apiBaseUrl = window.LYNX_CONFIG?.apiBaseUrl || 'http://go.lynx.fm:3500';
       
-      // Get the track URL directly from the API
-      const trackUrl = `${apiBaseUrl}/tracks/${trackId}`;
-      console.log('Using direct track URL:', trackUrl);
+      // Log the current origin for CORS debugging
+      console.log('Current origin:', window.location.origin);
+      console.log('API base URL:', apiBaseUrl);
       
       // Get authentication token
       let token = null;
@@ -204,6 +204,70 @@ export function MusicPlayer() {
       if (!token) {
         throw new Error('Authentication required to play audio');
       }
+
+      // Use a static test audio source if available
+      const useTestAudio = true; // Set to false to use the real API
+      
+      if (useTestAudio) {
+        // List of test audio files that are known to work
+        const testAudioSources = [
+          'https://file-examples.com/storage/fee788afd563954e0d26a49/2017/11/file_example_MP3_700KB.mp3',
+          'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'
+        ];
+        
+        // Select a test audio source
+        const testAudioUrl = testAudioSources[0];
+        console.log('Using test audio source:', testAudioUrl);
+        
+        // Create audio element
+        const audio = new Audio(testAudioUrl);
+        
+        // Set up detailed error handling
+        audio.onerror = (e) => {
+          console.log('Test audio error event:', e);
+          console.log('Test audio error object:', audio.error);
+          if (audio.error) {
+            console.error('Test audio error code:', audio.error.code);
+            console.error('Test audio error message:', audio.error.message);
+          }
+        };
+        
+        audio.oncanplay = () => {
+          console.log('Test audio can play');
+          audio.play().catch(err => {
+            console.error('Test audio play error:', err);
+          });
+        };
+        
+        // Update current track info with test audio
+        setCurrentTrack({
+          id: trackId,
+          title: 'Test Audio',
+          artist: 'LynxFM Test',
+          url: testAudioUrl
+        });
+        
+        // Set the audio source
+        if (audioRef.current) {
+          audioRef.current.src = testAudioUrl;
+          audioRef.current.load();
+          
+          // Play the audio with a small delay
+          setTimeout(() => {
+            if (audioRef.current) {
+              audioRef.current.play().catch(error => {
+                console.error('Test audio ref play error:', error);
+              });
+            }
+          }, 200);
+        }
+        
+        return; // Skip the rest of the function when using test audio
+      }
+      
+      // Continue with real API if not using test audio
+      const trackUrl = `${apiBaseUrl}/tracks/${trackId}`;
+      console.log('Using direct track URL:', trackUrl);
       
       // Create a direct audio element with authentication
       const audio = new Audio();
