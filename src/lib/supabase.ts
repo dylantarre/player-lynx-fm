@@ -1,27 +1,73 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+declare global {
+  interface Window {
+    ENV: {
+      VITE_SUPABASE_URL: string;
+      VITE_SUPABASE_ANON_KEY: string;
+      VITE_API_BASE_URL: string;
+    };
+  }
+}
+
+// Get environment variables with fallbacks
+const getEnvVar = (key: 'VITE_SUPABASE_URL' | 'VITE_SUPABASE_ANON_KEY' | 'VITE_API_BASE_URL'): string => {
+  const value = window.ENV?.[key] || import.meta.env[key];
+  if (!value) {
+    console.warn(`Environment variable ${key} is not defined`);
+  }
+  return value;
+};
+
+const supabaseUrl = getEnvVar('VITE_SUPABASE_URL');
+const supabaseAnonKey = getEnvVar('VITE_SUPABASE_ANON_KEY');
 
 // Debug information for environment variables
 console.log('Supabase URL defined:', !!supabaseUrl);
 console.log('Supabase Anon Key defined:', !!supabaseAnonKey);
 
-// Fallback to development values if environment variables are not set
-// IMPORTANT: This is only for development, should be removed in production
-const fallbackUrl = 'https://your-fallback-supabase-url.supabase.co';
-const fallbackKey = 'your-fallback-anon-key';
-
-// Use environment variables if available, otherwise use fallbacks
-const url = supabaseUrl || fallbackUrl;
-const key = supabaseAnonKey || fallbackKey;
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn('Using fallback Supabase credentials. This should only happen in development.');
-}
-
-export const supabase = createClient(url, key, {
+// Create Supabase client with persistSession: false as per project requirements
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     persistSession: false // As per project requirements
   }
 });
+
+// Simplified interface for authentication as per project memory
+export const lynxSupabase = {
+  async signInWithPassword(email: string, password: string) {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      return { success: !error, user: data.user, error };
+    } catch (error) {
+      return { success: false, user: null, error };
+    }
+  },
+
+  async signUp(email: string, password: string) {
+    try {
+      const { data, error } = await supabase.auth.signUp({ email, password });
+      return { success: !error, user: data.user, error };
+    } catch (error) {
+      return { success: false, user: null, error };
+    }
+  },
+
+  async signOut() {
+    try {
+      const { error } = await supabase.auth.signOut();
+      return { success: !error, error };
+    } catch (error) {
+      return { success: false, error };
+    }
+  },
+
+  async getCurrentUser() {
+    try {
+      const { data: { user }, error } = await supabase.auth.getUser();
+      return { success: !error, user, error };
+    } catch (error) {
+      return { success: false, user: null, error };
+    }
+  }
+};
