@@ -1,40 +1,46 @@
-# Build stage
-FROM node:18-alpine as builder
+# Use Node.js LTS version based on Alpine Linux for a smaller footprint
+FROM node:20-alpine AS build
 
+# Set working directory
 WORKDIR /app
 
-# Accept build arguments
-ARG VITE_SUPABASE_URL
-ARG VITE_SUPABASE_ANON_KEY
-ARG VITE_API_BASE_URL
+# Copy package files
+COPY package.json package-lock.json ./
 
-# Set build-time environment variables for the build process
-ENV VITE_SUPABASE_URL=${VITE_SUPABASE_URL}
-ENV VITE_SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY}
-ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
-
-# Copy package files and install dependencies
-COPY package*.json ./
+# Install dependencies
 RUN npm ci
 
-# Copy source code and build the app
+# Copy the rest of the application
 COPY . .
+
+# Create an env-config.js file that will be included in the build
+RUN echo "window.__env = {" > public/env-config.js && \
+    echo "  VITE_SUPABASE_URL: '${VITE_SUPABASE_URL}'," >> public/env-config.js && \
+    echo "  VITE_SUPABASE_ANON_KEY: '${VITE_SUPABASE_ANON_KEY}'," >> public/env-config.js && \
+    echo "  VITE_API_BASE_URL: '${VITE_API_BASE_URL:-/api}'," >> public/env-config.js && \
+    echo "};" >> public/env-config.js
+
+# Build the application
 RUN npm run build
 
 # Production stage
-FROM nginx:alpine
+FROM nginx:stable-alpine
 
-# Copy custom Nginx configuration
+# Copy built assets from the build stage
+COPY --from=build /app/dist /usr/share/nginx/html
+
+# Copy custom nginx config
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Copy built files from builder stage
-COPY --from=builder /app/dist /usr/share/nginx/html
+# Copy environment setup script
+COPY env.sh /docker-entrypoint.d/40-env.sh
+RUN chmod +x /docker-entrypoint.d/40-env.sh
 
-# Use a simplified entrypoint script (see next file)
-COPY docker-entrypoint.sh /
-RUN chmod +x /docker-entrypoint.sh
+# Expose port
+EXPOSE 80
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
-    CMD wget --quiet --tries=1 --spider http://localhost:80/ || exit 1
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 CMD wget --quiet --tries=1 --spider http://localhost:80/ || exit 1
 
-ENTRYPOINT ["/docker-entrypoint.sh"]
+# Start nginx
+CMD ["nginx", "-g", "daemon off;"]
