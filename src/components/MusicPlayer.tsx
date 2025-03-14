@@ -207,6 +207,19 @@ export function MusicPlayer() {
         audioRef.current.src = objectUrl;
         audioRef.current.load();
         
+        // Add error handling for audio element
+        const handleAudioError = (e: Event) => {
+          console.log('Audio error details:', e);
+          if (audioRef.current && audioRef.current.error) {
+            console.error('Audio element error:', audioRef.current.error);
+          }
+        };
+        
+        // Remove previous error listener if exists
+        audioRef.current.removeEventListener('error', handleAudioError);
+        // Add error listener
+        audioRef.current.addEventListener('error', handleAudioError);
+        
         // Use a small timeout to ensure the audio element has loaded the new source
         setTimeout(() => {
           if (audioRef.current) {
@@ -218,6 +231,25 @@ export function MusicPlayer() {
               }).catch(error => {
                 console.error('Error playing audio:', error);
                 setIsPlaying(false);
+                
+                // Try alternative playback method if initial method fails
+                console.log('Attempting alternative playback method...');
+                try {
+                  // Create a new Audio object as a fallback
+                  const audioElement = new Audio(objectUrl);
+                  audioElement.onplay = () => {
+                    console.log('Alternative audio playback started');
+                    setIsPlaying(true);
+                  };
+                  audioElement.onerror = () => {
+                    console.error('Alternative audio playback failed');
+                  };
+                  audioElement.play().catch(err => {
+                    console.error('Alternative audio play promise failed:', err);
+                  });
+                } catch (fallbackError) {
+                  console.error('Alternative playback method failed:', fallbackError);
+                }
               });
             }
           }
