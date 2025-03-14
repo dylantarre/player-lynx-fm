@@ -4,10 +4,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        VITE_SUPABASE_URL: ${VITE_SUPABASE_URL}
-        VITE_SUPABASE_ANON_KEY: ${VITE_SUPABASE_ANON_KEY}
-        VITE_API_BASE_URL: ${VITE_API_BASE_URL}
+    secrets:
+      - VITE_SUPABASE_URL
+      - VITE_SUPABASE_ANON_KEY
+      - VITE_API_BASE_URL
     container_name: lynx-fm
     restart: unless-stopped
     ports:
@@ -31,3 +31,11 @@ services:
 networks:
   lynx-network:
     driver: bridge
+
+secrets:
+  VITE_SUPABASE_URL:
+    file: ./secrets/VITE_SUPABASE_URL
+  VITE_SUPABASE_ANON_KEY:
+    file: ./secrets/VITE_SUPABASE_ANON_KEY
+  VITE_API_BASE_URL:
+    file: ./secrets/VITE_API_BASE_URL
