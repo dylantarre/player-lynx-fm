@@ -33,40 +33,34 @@ interface TrackMetadata {
   coverArt?: string;
 }
 
-interface ApiError {
-  message: string;
-  code?: string;
-  status?: number;
-}
-
 // Helper function to handle fetch errors
 async function fetchWithErrorHandling(url: string, options: RequestInit = {}): Promise<Response> {
   try {
-    console.log(`Fetching from: ${url}`);
+    const headers = new Headers(options.headers);
+    headers.set('Accept', headers.get('Accept') || 'application/json');
+    headers.set('Origin', window.location.origin);
+
     const response = await fetch(url, {
       ...options,
-      headers: {
-        ...options.headers,
-        'Accept': 'application/json',
-      }
+      credentials: 'include', // Include credentials for CORS
+      mode: 'cors', // Explicitly set CORS mode
+      headers
     });
 
     if (!response.ok) {
       let errorMessage = `HTTP error! status: ${response.status}`;
       try {
-        const errorData: ApiError = await response.json();
-        errorMessage = errorData.message || errorMessage;
+        const errorText = await response.text();
+        errorMessage = `${errorMessage}, message: ${errorText}`;
       } catch {
-        // If we can't parse the error as JSON, just use the status message
+        // If we can't parse the error text, just use the status message
       }
-      
-      console.error('API response error:', errorMessage, response.status);
       throw new Error(errorMessage);
     }
 
     return response;
   } catch (error) {
-    console.error('API fetch error:', error);
+    console.error('Fetch error:', error);
     if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
       throw new Error('Network error when connecting to Lynx API. Please check your connection and try again.');
     }
@@ -207,13 +201,19 @@ export const lynxApi = {
       const response = await fetchWithErrorHandling(`${API_BASE_URL}/tracks/${trackId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
-          'Accept': 'audio/mpeg, audio/mp3, audio/*'
+          'Accept': 'audio/mpeg, audio/mp3, audio/*',
+          'Range': 'bytes=0-', // Support range requests for streaming
         }
       });
       
       // Check response headers
       const contentType = response.headers.get('content-type');
       console.log(`Audio response content-type: ${contentType}`);
+      
+      // Verify content type
+      if (!contentType?.includes('audio/')) {
+        throw new Error(`Invalid content type: ${contentType}`);
+      }
       
       // Check response status
       console.log(`Audio response status: ${response.status}`);
@@ -222,10 +222,14 @@ export const lynxApi = {
       const blob = await response.blob();
       console.log(`Audio blob size: ${blob.size} bytes, type: ${blob.type}`);
       
+      if (blob.size === 0) {
+        throw new Error('Received empty audio blob');
+      }
+      
       return blob;
     } catch (error) {
       console.error('Error fetching track audio:', error);
-      return null;
+      throw error; // Propagate error for better handling
     }
   },
 

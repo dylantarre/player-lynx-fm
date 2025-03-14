@@ -57,10 +57,10 @@ export const supabase = createClient(
   supabaseAnonKey,
   {
     auth: {
-      persistSession: true, // Enable session persistence to fix logout issues
+      persistSession: true,
       autoRefreshToken: true,
-      detectSessionInUrl: false, // Disable automatic URL detection which can cause issues with proxies
-      storage: sessionStorage // Use sessionStorage instead of localStorage for better security
+      detectSessionInUrl: false,
+      storage: localStorage
     },
     global: {
       fetch: (...args) => {

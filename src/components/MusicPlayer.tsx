@@ -24,6 +24,7 @@ export function MusicPlayer() {
   const [currentView, setCurrentView] = useState<View>('player');
   const [audioObjectUrl, setAudioObjectUrl] = useState<string | null>(null);
   const [recentTracks, setRecentTracks] = useState<string[]>([]);
+  const [audioError, setAudioError] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const { colorScheme, setColorScheme } = useContext(ColorSchemeContext);
   const navigate = useNavigate();
@@ -100,16 +101,35 @@ export function MusicPlayer() {
     navigate('/login');
   };
 
+  const retryAudioPlay = async (retries = 3) => {
+    if (!audioRef.current) return;
+    
+    for (let i = 0; i < retries; i++) {
+      try {
+        await audioRef.current.play();
+        setIsPlaying(true);
+        setAudioError(null);
+        break;
+      } catch (error) {
+        console.error(`Audio playback attempt ${i + 1} failed:`, error);
+        if (i === retries - 1) {
+          setAudioError('Failed to play audio. Please try again.');
+          setIsPlaying(false);
+        } else {
+          await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1s before retry
+        }
+      }
+    }
+  };
+
   const togglePlay = () => {
     if (audioRef.current) {
       if (isPlaying) {
         audioRef.current.pause();
+        setIsPlaying(false);
       } else {
-        audioRef.current.play().catch(error => {
-          console.error('Error playing audio:', error);
-        });
+        retryAudioPlay();
       }
-      setIsPlaying(!isPlaying);
     }
   };
 
@@ -412,6 +432,9 @@ export function MusicPlayer() {
             {serverStatus === false && (
               <p className="text-red-400 mt-2">Server connection error</p>
             )}
+            {audioError && (
+              <p className="text-red-400 mt-2">{audioError}</p>
+            )}
             </div>
           
             <div className="flex justify-center space-x-6">
@@ -453,7 +476,13 @@ export function MusicPlayer() {
               onEnded={() => setIsPlaying(false)}
               src={currentTrack?.url || ''}
               preload="auto"
-              onError={(e) => console.error('Audio error:', e)}
+              onError={(e) => {
+                console.error('Audio error:', e);
+                const error = e.currentTarget.error;
+                if (error) {
+                  setAudioError(`Audio error: ${error.message}`);
+                }
+              }}
             />
           </div>
         ) : (
