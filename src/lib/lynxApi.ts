@@ -1,7 +1,7 @@
 import { supabase } from './supabase';
 
 // Use the Nginx proxy for API requests
-const API_BASE_URL = '/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 // Define types
 export interface Track {
@@ -21,22 +21,68 @@ export interface UserInfo {
   role: string;
 }
 
-// Get the JWT token from Supabase
-const getAuthToken = async (): Promise<string | null> => {
-  const { data } = await supabase.auth.getSession();
-  return data.session?.access_token || null;
-};
+// API Response Types
+interface TrackMetadata {
+  id: string;
+  title: string;
+  artist: string;
+  album?: string;
+  duration: number;
+  coverArt?: string;
+}
+
+interface ApiError {
+  message: string;
+  code?: string;
+  status?: number;
+}
+
+// Helper function to handle fetch errors
+async function fetchWithErrorHandling(url: string, options: RequestInit = {}): Promise<Response> {
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        ...options.headers,
+        'Accept': 'application/json',
+      }
+    });
+
+    if (!response.ok) {
+      const errorData: ApiError = await response.json().catch(() => ({
+        message: 'Unknown error occurred',
+        status: response.status
+      }));
+      
+      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    }
+
+    return response;
+  } catch (error) {
+    console.error('API fetch error:', error);
+    throw new Error('Network error when connecting to Lynx API. Please check your connection and try again.');
+  }
+}
+
+// Get the auth token for API requests
+async function getAuthToken(): Promise<string | null> {
+  try {
+    const { data: { session }, error } = await supabase.auth.getSession();
+    if (error) throw error;
+    return session?.access_token || null;
+  } catch (error) {
+    console.error('Error getting auth token:', error);
+    return null;
+  }
+}
 
 // API client for Go-Lynx server
 export const lynxApi = {
   // Public endpoints (no auth required)
   async healthCheck(): Promise<boolean> {
     try {
-      console.log('Checking server health...');
-      const response = await fetch(`${API_BASE_URL}/health`);
-      const isHealthy = response.ok;
-      console.log('Server health status:', isHealthy);
-      return isHealthy;
+      const response = await fetchWithErrorHandling(`${API_BASE_URL}/health`);
+      return response.ok;
     } catch (error) {
       console.error('Health check failed:', error);
       return false;
@@ -46,7 +92,7 @@ export const lynxApi = {
   async getRandomTrackId(): Promise<string | null> {
     try {
       console.log('Fetching random track ID...');
-      const response = await fetch(`${API_BASE_URL}/random`);
+      const response = await fetchWithErrorHandling(`${API_BASE_URL}/random`);
       if (!response.ok) {
         throw new Error(`Failed to get random track: ${response.status}`);
       }
@@ -69,7 +115,7 @@ export const lynxApi = {
 
     try {
       console.log('Fetching user info...');
-      const response = await fetch(`${API_BASE_URL}/me`, {
+      const response = await fetchWithErrorHandling(`${API_BASE_URL}/me`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -102,7 +148,7 @@ export const lynxApi = {
 
     try {
       console.log('Prefetching tracks:', trackIds);
-      const response = await fetch(`${API_BASE_URL}/prefetch`, {
+      const response = await fetchWithErrorHandling(`${API_BASE_URL}/prefetch`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -124,44 +170,36 @@ export const lynxApi = {
     }
   },
 
-  // Helper method to fetch track audio with authentication
   async fetchTrackAudio(trackId: string): Promise<Blob | null> {
-    console.log(`Fetching audio for track: ${trackId}`);
     const token = await getAuthToken();
     if (!token) {
-      console.error('No authentication token available');
       throw new Error('Authentication required');
     }
-    
-    try {
-      console.log(`Making authenticated request to ${API_BASE_URL}/tracks/${trackId}`);
-      console.log(`Using token: ${token.substring(0, 10)}...`);
-      
-      const response = await fetch(`${API_BASE_URL}/tracks/${trackId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`Server responded with status ${response.status}: ${errorText}`);
-        throw new Error(`Failed to fetch track audio: ${response.status} - ${errorText}`);
+
+    const response = await fetchWithErrorHandling(`${API_BASE_URL}/tracks/${trackId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`
       }
-      
-      const contentType = response.headers.get('content-type');
-      console.log(`Received response with content type: ${contentType}`);
-      
-      const blob = await response.blob();
-      console.log(`Received blob of size: ${blob.size} bytes and type: ${blob.type}`);
-      return blob;
-    } catch (error) {
-      console.error('Failed to fetch track audio:', error);
-      return null;
-    }
+    });
+
+    return await response.blob();
   },
 
-  // Helper method to create an authenticated audio source
+  async fetchTrackMetadata(trackId: string): Promise<TrackMetadata> {
+    const token = await getAuthToken();
+    if (!token) {
+      throw new Error('Authentication required');
+    }
+
+    const response = await fetchWithErrorHandling(`${API_BASE_URL}/tracks/${trackId}/metadata`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    return await response.json();
+  },
+
   async createAuthenticatedAudioSource(trackId: string): Promise<{ url: string; token: string | null }> {
     const token = await getAuthToken();
     

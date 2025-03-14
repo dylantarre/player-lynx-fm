@@ -1,35 +1,56 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext } from 'react';
 import { supabase } from '../lib/supabase';
 import { LogIn, UserPlus, Cat } from 'lucide-react';
 import { ColorSchemeContext } from '../App';
+import { AuthError } from '@supabase/supabase-js';
 
 export function Auth() {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const { colorScheme } = useContext(ColorSchemeContext);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setErrorMessage('');
     
     try {
       if (isSignUp) {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
         });
+        
         if (error) throw error;
+        
+        if (data?.user) {
+          console.log('Signup successful');
+        }
       } else {
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
+        
         if (error) throw error;
+        
+        if (data?.user) {
+          console.log('Login successful');
+        }
       }
     } catch (error) {
-      alert(error.message);
+      console.error('Authentication error:', error);
+      
+      if (error instanceof AuthError) {
+        setErrorMessage(error.message);
+      } else if (error instanceof Error && (error.message?.includes('fetch') || error.message?.includes('network') || !navigator.onLine)) {
+        setErrorMessage('Network error. Please check your connection and try again.');
+      } else {
+        setErrorMessage('Authentication failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -51,6 +72,13 @@ export function Auth() {
             {isSignUp ? 'Create Account' : 'lynx.fm'}
           </h2>
         </div>
+        
+        {errorMessage && (
+          <div className="mb-4 p-3 bg-red-500/20 border border-red-500/30 rounded-lg text-red-200 text-sm">
+            {errorMessage}
+          </div>
+        )}
+        
         <p className="text-center text-amber-200/60 mb-8 text-sm font-medium">
           {isSignUp ? 'Sign up to start listening' : 'Welcome back'}
         </p>
