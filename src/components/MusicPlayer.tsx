@@ -180,80 +180,102 @@ export function MusicPlayer() {
         setAudioObjectUrl(null);
       }
 
-      // Fetch the track audio with authentication
-      const audioBlob = await lynxApi.fetchTrackAudio(trackId);
+      // Get the authenticated audio source information
+      const { url, token } = await lynxApi.createAuthenticatedAudioSource(trackId);
       
-      if (!audioBlob) {
-        throw new Error('Failed to fetch audio');
+      if (!token) {
+        throw new Error('Authentication required to play audio');
       }
       
-      console.log('Audio blob received, size:', audioBlob.size);
+      console.log('Got authenticated audio source:', url);
       
-      // Create an object URL from the blob
-      const objectUrl = URL.createObjectURL(audioBlob);
-      setAudioObjectUrl(objectUrl);
+      // Create a direct audio element with authentication
+      const audio = new Audio();
+      
+      // Set up audio element event handlers
+      audio.onerror = (e) => {
+        console.log('Audio error details:', e);
+        console.error('Audio element error:', audio.error);
+      };
+      
+      audio.oncanplay = () => {
+        console.log('Audio can play now');
+        setIsPlaying(true);
+        audio.play().catch(err => {
+          console.error('Error playing audio:', err);
+        });
+      };
+      
+      // Set the audio source with authentication header
+      const originalFetch = window.fetch;
+      window.fetch = (input, init) => {
+        if (typeof input === 'string' && input.includes(trackId)) {
+          return originalFetch(input, {
+            ...init,
+            headers: {
+              ...init?.headers,
+              'Authorization': `Bearer ${token}`
+            }
+          });
+        }
+        return originalFetch(input, init);
+      };
       
       // Update current track info
       setCurrentTrack({
         id: trackId,
         title: trackId.charAt(0).toUpperCase() + trackId.slice(1).replace('!', ''),
         artist: 'Lynx FM',
-        url: objectUrl
+        url: url
       });
       
-      // Set the audio source and play
+      // Set the audio source
+      audio.src = url;
+      audio.load();
+      
+      // Restore original fetch
+      setTimeout(() => {
+        window.fetch = originalFetch;
+      }, 1000);
+      
+      // Set the audio reference
       if (audioRef.current) {
-        console.log('Setting audio source and playing');
-        audioRef.current.src = objectUrl;
+        audioRef.current.src = url;
         audioRef.current.load();
         
-        // Add error handling for audio element
-        const handleAudioError = (e: Event) => {
-          console.log('Audio error details:', e);
-          if (audioRef.current && audioRef.current.error) {
-            console.error('Audio element error:', audioRef.current.error);
+        // Add custom headers to audio element request
+        const originalXHROpen = XMLHttpRequest.prototype.open;
+        XMLHttpRequest.prototype.open = function(method: string, url: string | URL, async: boolean = true, username?: string | null, password?: string | null) {
+          if (typeof url === 'string' && url.includes(trackId)) {
+            this.addEventListener('readystatechange', function() {
+              if (this.readyState === 1) { // OPENED
+                this.setRequestHeader('Authorization', `Bearer ${token}`);
+              }
+            });
           }
+          
+          return originalXHROpen.call(this, method, url, async, username || null, password || null);
         };
         
-        // Remove previous error listener if exists
-        audioRef.current.removeEventListener('error', handleAudioError);
-        // Add error listener
-        audioRef.current.addEventListener('error', handleAudioError);
-        
-        // Use a small timeout to ensure the audio element has loaded the new source
-        setTimeout(() => {
-          if (audioRef.current) {
-            const playPromise = audioRef.current.play();
-            if (playPromise !== undefined) {
-              playPromise.then(() => {
-                console.log('Audio playback started successfully');
-                setIsPlaying(true);
-              }).catch(error => {
-                console.error('Error playing audio:', error);
-                setIsPlaying(false);
-                
-                // Try alternative playback method if initial method fails
-                console.log('Attempting alternative playback method...');
-                try {
-                  // Create a new Audio object as a fallback
-                  const audioElement = new Audio(objectUrl);
-                  audioElement.onplay = () => {
-                    console.log('Alternative audio playback started');
-                    setIsPlaying(true);
-                  };
-                  audioElement.onerror = () => {
-                    console.error('Alternative audio playback failed');
-                  };
-                  audioElement.play().catch(err => {
-                    console.error('Alternative audio play promise failed:', err);
-                  });
-                } catch (fallbackError) {
-                  console.error('Alternative playback method failed:', fallbackError);
-                }
-              });
-            }
-          }
-        }, 100);
+        // Play the audio
+        const playPromise = audioRef.current.play();
+        if (playPromise !== undefined) {
+          playPromise.then(() => {
+            console.log('Audio playback started successfully');
+            setIsPlaying(true);
+            
+            // Restore original XHR
+            setTimeout(() => {
+              XMLHttpRequest.prototype.open = originalXHROpen;
+            }, 1000);
+          }).catch(error => {
+            console.error('Error playing audio:', error);
+            setIsPlaying(false);
+            
+            // Restore original XHR
+            XMLHttpRequest.prototype.open = originalXHROpen;
+          });
+        }
       }
     } catch (error) {
       console.error('Error loading track:', error);

@@ -171,18 +171,37 @@ export const lynxApi = {
   },
 
   async fetchTrackAudio(trackId: string): Promise<Blob | null> {
-    const token = await getAuthToken();
-    if (!token) {
-      throw new Error('Authentication required');
-    }
-
-    const response = await fetchWithErrorHandling(`${API_BASE_URL}/tracks/${trackId}`, {
-      headers: {
-        Authorization: `Bearer ${token}`
+    try {
+      const token = await getAuthToken();
+      if (!token) {
+        throw new Error('Authentication required');
       }
-    });
 
-    return await response.blob();
+      console.log(`Fetching audio for track: ${trackId}`);
+      
+      const response = await fetchWithErrorHandling(`${API_BASE_URL}/tracks/${trackId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Accept': 'audio/mpeg, audio/mp3, audio/*'
+        }
+      });
+      
+      // Check response headers
+      const contentType = response.headers.get('content-type');
+      console.log(`Audio response content-type: ${contentType}`);
+      
+      // Check response status
+      console.log(`Audio response status: ${response.status}`);
+      
+      // Get the blob
+      const blob = await response.blob();
+      console.log(`Audio blob size: ${blob.size} bytes, type: ${blob.type}`);
+      
+      return blob;
+    } catch (error) {
+      console.error('Error fetching track audio:', error);
+      return null;
+    }
   },
 
   async fetchTrackMetadata(trackId: string): Promise<TrackMetadata> {
