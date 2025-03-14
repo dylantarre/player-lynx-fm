@@ -1,11 +1,11 @@
 # Use Node.js LTS version based on Alpine Linux for a smaller footprint
-FROM node:20-alpine AS build
+FROM node:18-alpine AS build
 
 # Set working directory
 WORKDIR /app
 
 # Copy package files
-COPY package.json package-lock.json ./
+COPY package*.json ./
 
 # Install dependencies
 RUN npm ci
@@ -17,7 +17,7 @@ COPY . .
 RUN npm run build
 
 # Production stage
-FROM nginx:stable-alpine
+FROM nginx:alpine
 
 # Copy built assets from the build stage
 COPY --from=build /app/dist /usr/share/nginx/html
@@ -33,7 +33,8 @@ RUN chmod +x /docker-entrypoint.d/40-env.sh
 EXPOSE 80
 
 # Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 CMD wget --quiet --tries=1 --spider http://localhost:80/ || exit 1
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+    CMD wget --quiet --tries=1 --spider http://localhost:80/ || exit 1
 
 # Start nginx
 CMD ["nginx", "-g", "daemon off;"]
