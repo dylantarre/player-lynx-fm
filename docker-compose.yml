@@ -1,11 +1,8 @@
-version: '3.8'
-
 services:
   lynx-fm:
     build:
       context: .
       dockerfile: Dockerfile
-    image: lynx-fm:latest
     container_name: lynx-fm
     restart: unless-stopped
     ports:
