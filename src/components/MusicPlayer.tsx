@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useContext } from 'react';
+import { useState, useEffect, useRef, useContext } from 'react';
 import { Play, Pause, Square, Shuffle, LogOut, SwatchBook as Swatch, User, Music } from 'lucide-react';
 import { lynxApi } from '../lib/lynxApi';
 import { supabase } from '../lib/supabase';
@@ -180,8 +180,11 @@ export function MusicPlayer() {
         setAudioObjectUrl(null);
       }
 
+      // Get the API base URL from config or use the default
+      const apiBaseUrl = window.LYNX_CONFIG?.apiBaseUrl || 'http://go.lynx.fm:3500';
+      
       // Get the track URL directly from the API
-      const trackUrl = `http://go.lynx.fm:3500/tracks/${trackId}`;
+      const trackUrl = `${apiBaseUrl}/tracks/${trackId}`;
       console.log('Using direct track URL:', trackUrl);
       
       // Get authentication token
