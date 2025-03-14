@@ -26,10 +26,18 @@ const supabaseAnonKey = getEnvVar('VITE_SUPABASE_ANON_KEY');
 console.log('Supabase URL defined:', !!supabaseUrl);
 console.log('Supabase Anon Key defined:', !!supabaseAnonKey);
 
-// Create Supabase client with persistSession: false as per project requirements
+// Create Supabase client with Zero Trust compatible configuration
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
-    persistSession: false // As per project requirements
+    persistSession: false,
+    detectSessionInUrl: false,
+    flowType: 'pkce'
+  },
+  global: {
+    headers: {
+      'Cache-Control': 'no-cache',
+      'Pragma': 'no-cache'
+    }
   }
 });
 
@@ -38,18 +46,28 @@ export const lynxSupabase = {
   async signInWithPassword(email: string, password: string) {
     try {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      return { success: !error, user: data.user, error };
+      return { success: !error, user: data?.user || null, error };
     } catch (error) {
-      return { success: false, user: null, error };
+      console.error('Authentication error:', error);
+      return { 
+        success: false, 
+        user: null, 
+        error: new Error('Unable to connect. Please check your network connection and try again.')
+      };
     }
   },
 
   async signUp(email: string, password: string) {
     try {
       const { data, error } = await supabase.auth.signUp({ email, password });
-      return { success: !error, user: data.user, error };
+      return { success: !error, user: data?.user || null, error };
     } catch (error) {
-      return { success: false, user: null, error };
+      console.error('Sign up error:', error);
+      return { 
+        success: false, 
+        user: null, 
+        error: new Error('Unable to connect. Please check your network connection and try again.')
+      };
     }
   },
 
@@ -58,16 +76,25 @@ export const lynxSupabase = {
       const { error } = await supabase.auth.signOut();
       return { success: !error, error };
     } catch (error) {
-      return { success: false, error };
+      console.error('Sign out error:', error);
+      return { 
+        success: false, 
+        error: new Error('Unable to sign out. Please try again.')
+      };
     }
   },
 
   async getCurrentUser() {
     try {
       const { data: { user }, error } = await supabase.auth.getUser();
-      return { success: !error, user, error };
+      return { success: !error, user: user || null, error };
     } catch (error) {
-      return { success: false, user: null, error };
+      console.error('Get user error:', error);
+      return { 
+        success: false, 
+        user: null, 
+        error: new Error('Unable to get user information. Please try again.')
+      };
     }
   }
 };
