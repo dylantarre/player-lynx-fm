@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
 import { ColorSchemeContext } from '../App';
 import { lynxApi } from '../lib/lynxApi';
+import { LynxCat } from './LynxCat';
 
 type View = 'player' | 'profile';
 
@@ -318,33 +319,44 @@ export function MusicPlayer() {
   }, [audioObjectUrl]);
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br ${colorScheme?.from} ${colorScheme?.via} ${colorScheme?.to} flex items-center justify-center p-4 relative overflow-hidden`}>
+    <div className={`relative min-h-screen flex items-center justify-center bg-gradient-to-br ${colorScheme.from} ${colorScheme.via} ${colorScheme.to} overflow-hidden`}>
       {/* Ethereal background effects */}
       <div className="absolute inset-0">
         <div className={`absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-br ${colorScheme.accent1} rounded-full filter blur-3xl animate-pulse-slow`}></div>
         <div className={`absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-br ${colorScheme.accent2} rounded-full filter blur-3xl animate-pulse-slow delay-1000`}></div>
         <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br ${colorScheme.accent3} rounded-full filter blur-3xl animate-float`}></div>
       </div>
-      
-      {/* Color scheme button */}
+
+      <div className="flex items-center justify-between p-4">
+        <div className="flex items-center gap-2">
+          <LynxCat className="w-10 h-10 text-amber-400" />
+          <h1 className="text-3xl font-kaushan text-amber-400 leading-loose pb-1">lynx.fm</h1>
+        </div>
+        <button
+          onClick={handleLogout}
+          className="absolute top-4 right-4 text-white/70 hover:text-white transition-all"
+          title="Logout"
+        >
+          <LogOut className="w-5 h-5" />
+        </button>
+      </div>
+
       <button
         onClick={changeColorScheme}
-        className={`absolute bottom-4 left-4 p-3 rounded-full bg-gradient-to-r ${colorScheme.from.replace('from-', 'from-')} ${colorScheme.via.replace('via-', 'to-')} text-white/70 hover:text-white transition-all shadow-elevated hover:shadow-elevated-hover backdrop-blur-sm hover:-translate-y-0.5 border border-white/20`}
+        className="absolute bottom-4 left-4 text-white/70 hover:text-white transition-all"
         title="Change color scheme"
       >
         <Swatch className="w-5 h-5" />
       </button>
 
-      {/* View toggle button */}
       <button
         onClick={() => setCurrentView(currentView === 'player' ? 'profile' : 'player')}
-        className={`absolute bottom-4 right-4 p-3 rounded-full bg-gradient-to-r ${colorScheme.from.replace('from-', 'from-')} ${colorScheme.via.replace('via-', 'to-')} text-white/70 hover:text-white transition-all shadow-elevated hover:shadow-elevated-hover backdrop-blur-sm hover:-translate-y-0.5 border border-white/20`}
+        className="absolute bottom-4 right-4 text-white/70 hover:text-white transition-all"
         title={currentView === 'player' ? 'View Profile' : 'View Player'}
       >
         {currentView === 'player' ? <User className="w-5 h-5" /> : <Music className="w-5 h-5" />}
       </button>
-      
-      <div className="max-w-md w-full bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-xl rounded-3xl shadow-elevated overflow-hidden border border-white/20 transition-all hover:shadow-elevated-hover relative">
+      <div className="max-w-md w-full bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-xl rounded-3xl shadow-elevated overflow-hidden border border-white/20 transition-all hover:shadow-elevated-hover relative mx-auto mt-8">
         {/* Morphing background effect */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className={`absolute -inset-1/2 w-[200%] h-[200%] bg-gradient-to-br ${colorScheme.accent1} rounded-full filter blur-3xl opacity-30 scale-[var(--morph-scale-1)]`}></div>
@@ -374,13 +386,13 @@ export function MusicPlayer() {
                     ></div>
                   </div>
                 </div>
-              <div className="uppercase tracking-wider text-sm text-teal-300 font-bold mb-2">
+              <div className="uppercase tracking-wider text-sm font-kaushan text-teal-300 font-bold leading-loose pb-1 mb-2">
                 Now Playing
               </div>
-              <h2 className="text-3xl font-bold text-white mb-2">
+              <h2 className="text-3xl font-kaushan text-white leading-loose pb-1">
                 {isLoading ? 'Loading...' : (currentTrack?.title || 'Select a Track')}
               </h2>
-              <p className="text-emerald-200/80 font-medium">
+              <p className="text-emerald-200/80 font-kaushan leading-loose pb-1">
                 {currentTrack?.artist || ''}
               </p>
               {serverStatus === false && (
@@ -392,7 +404,7 @@ export function MusicPlayer() {
               <button
                 onClick={togglePlay}
                 disabled={!currentTrack || isLoading}
-                className={`p-4 rounded-full bg-gradient-to-r ${colorScheme.from.replace('from-', 'from-')}/80 ${colorScheme.via.replace('via-', 'to-')}/80 text-white hover:${colorScheme.from.replace('from-', 'from-')}/60 hover:${colorScheme.via.replace('via-', 'to-')}/60 transition-all shadow-elevated hover:shadow-elevated-hover backdrop-blur-sm hover:-translate-y-0.5 ${(!currentTrack || isLoading) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                className={`p-4 rounded-full bg-gradient-to-r ${colorScheme.from.replace('from-', 'from-')}/80 ${colorScheme.via.replace('via-', 'to-')}/80 text-white hover:${colorScheme.from.replace('from-', 'from-')}/60 hover:${colorScheme.via.replace('via-', 'to-')}/60 transition-all shadow-elevated hover:shadow-elevated-hover backdrop-blur-sm hover:-translate-y-0.5 border border-white/20`}
               >
                 {isPlaying ? (
                   <Pause className="w-8 h-8" />
@@ -404,7 +416,7 @@ export function MusicPlayer() {
               <button
                 onClick={stopPlay}
                 disabled={!currentTrack || isLoading}
-                className={`p-4 rounded-full bg-gradient-to-r ${colorScheme.via.replace('via-', 'from-')}/80 ${colorScheme.to.replace('to-', 'to-')}/80 text-white hover:${colorScheme.via.replace('via-', 'from-')}/60 hover:${colorScheme.to.replace('to-', 'to-')}/60 transition-all shadow-elevated hover:shadow-elevated-hover backdrop-blur-sm hover:-translate-y-0.5 ${(!currentTrack || isLoading) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                className={`p-4 rounded-full bg-gradient-to-r ${colorScheme.via.replace('via-', 'from-')}/80 ${colorScheme.to.replace('to-', 'to-')}/80 text-white hover:${colorScheme.via.replace('via-', 'from-')}/60 hover:${colorScheme.to.replace('to-', 'to-')}/60 transition-all shadow-elevated hover:shadow-elevated-hover backdrop-blur-sm hover:-translate-y-0.5 border border-white/20`}
               >
                 <Square className="w-8 h-8" />
               </button>
@@ -412,7 +424,7 @@ export function MusicPlayer() {
               <button
                 onClick={playRandom}
                 disabled={isLoading || serverStatus === false}
-                className={`p-4 rounded-full bg-gradient-to-r ${colorScheme.from.replace('from-', 'from-')}/80 ${colorScheme.to.replace('to-', 'to-')}/80 text-white hover:${colorScheme.from.replace('from-', 'from-')}/60 hover:${colorScheme.to.replace('to-', 'to-')}/60 transition-all shadow-elevated hover:shadow-elevated-hover backdrop-blur-sm hover:-translate-y-0.5 ${(isLoading || serverStatus === false) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                className={`p-4 rounded-full bg-gradient-to-r ${colorScheme.from.replace('from-', 'from-')}/80 ${colorScheme.to.replace('to-', 'to-')}/80 text-white hover:${colorScheme.from.replace('from-', 'from-')}/60 hover:${colorScheme.to.replace('to-', 'to-')}/60 transition-all shadow-elevated hover:shadow-elevated-hover backdrop-blur-sm hover:-translate-y-0.5 border border-white/20`}
               >
                 {isLoading ? (
                   <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -435,7 +447,7 @@ export function MusicPlayer() {
               <div className="flex justify-end mb-4">
                 <button
                   onClick={handleLogout}
-                  className="flex items-center text-white/70 hover:text-red-400 transition-colors"
+                  className="flex items-center text-white/70 hover:text-red-400 transition-colors font-kaushan leading-loose pb-1"
                 >
                   <LogOut className="w-5 h-5 mr-1" />
                   <span>Logout</span>
@@ -449,27 +461,27 @@ export function MusicPlayer() {
 
               <div className="space-y-6">
                 <div>
-                  <label className="block text-sm font-medium text-white/60 mb-2">Email</label>
-                  <div className="text-white font-medium">{userData.email}</div>
+                  <label className="block text-sm font-medium text-white/60 mb-2 font-kaushan leading-loose pb-1">Email</label>
+                  <div className="text-white font-kaushan leading-loose pb-1">{userData.email}</div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-white/60 mb-2">Member Since</label>
-                  <div className="text-white font-medium">
+                  <label className="block text-sm font-medium text-white/60 mb-2 font-kaushan leading-loose pb-1">Member Since</label>
+                  <div className="text-white font-kaushan leading-loose pb-1">
                     {userData.created_at ? new Date(userData.created_at).toLocaleDateString() : ''}
                   </div>
                 </div>
 
                 <div className="pt-4 border-t border-white/10">
-                  <h3 className="text-lg font-semibold text-white mb-4">Preferences</h3>
+                  <h3 className="text-lg font-semibold text-white leading-loose pb-1 font-kaushan">Preferences</h3>
                   <div className="space-y-4">
                     <label className="flex items-center space-x-3">
                       <input type="checkbox" className="rounded bg-white/10 border-white/20" />
-                      <span className="text-white">Enable notifications</span>
+                      <span className="text-white font-kaushan leading-loose pb-1">Enable notifications</span>
                     </label>
                     <label className="flex items-center space-x-3">
                       <input type="checkbox" className="rounded bg-white/10 border-white/20" />
-                      <span className="text-white">Auto-play next track</span>
+                      <span className="text-white font-kaushan leading-loose pb-1">Auto-play next track</span>
                     </label>
                   </div>
                 </div>
