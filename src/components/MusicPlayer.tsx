@@ -355,22 +355,25 @@ export function MusicPlayer() {
           {currentView === 'player' ? (
             <div className="p-8">
               <div className="text-center mb-12">
-              <div className="relative w-32 h-32 mx-auto mb-8">
                 <div 
-                  className={`absolute inset-0 bg-gradient-to-br ${colorScheme.accent1} ${colorScheme.accent3} animate-morph shadow-elevated`}
+                  className="relative w-32 h-32 mx-auto mb-8"
                   style={{ transform: `scale(${1 + (lowFreq / 768) * 0.65})` }}
-                ></div>
-                <div 
-                  className={`absolute inset-2 bg-gradient-to-br ${colorScheme.accent2} ${colorScheme.accent1} animate-morph-reverse shadow-elevated`}
-                  style={{ transform: `scale(${1 + (midFreq / 768) * 0.65})` }}
-                ></div>
-                <div className="absolute inset-4 rounded-full bg-gradient-to-br from-white/15 to-transparent backdrop-blur-sm flex items-center justify-center shadow-elevated">
+                >
                   <div 
-                    className={`w-16 h-16 rounded-full bg-gradient-to-br ${colorScheme.from.replace('from-', 'from-')}/80 ${colorScheme.via.replace('via-', 'to-')}/80 shadow-elevated`}
+                    className={`absolute inset-0 bg-gradient-to-br ${colorScheme.accent1} ${colorScheme.accent3} animate-morph shadow-elevated`}
+                    style={{ transform: `scale(${1 + (midFreq / 768) * 0.65})` }}
+                  ></div>
+                  <div 
+                    className={`absolute inset-2 bg-gradient-to-br ${colorScheme.accent2} ${colorScheme.accent1} animate-morph-reverse shadow-elevated`}
                     style={{ transform: `scale(${1 + (highFreq / 768) * 0.65})` }}
                   ></div>
+                  <div className="absolute inset-4 rounded-full bg-gradient-to-br from-white/15 to-transparent backdrop-blur-sm flex items-center justify-center shadow-elevated">
+                    <div 
+                      className={`w-16 h-16 rounded-full bg-gradient-to-br ${colorScheme.from.replace('from-', 'from-')}/80 ${colorScheme.via.replace('via-', 'to-')}/80 shadow-elevated`}
+                      style={{ transform: `scale(${1 + ((lowFreq + midFreq + highFreq) / (768 * 3)) * 0.65})` }}
+                    ></div>
+                  </div>
                 </div>
-              </div>
               <div className="uppercase tracking-wider text-sm text-teal-300 font-bold mb-2">
                 Now Playing
               </div>
