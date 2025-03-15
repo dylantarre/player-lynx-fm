@@ -319,12 +319,12 @@ export function MusicPlayer() {
   }, [audioObjectUrl]);
 
   return (
-    <div className={`relative min-h-screen bg-gradient-to-br ${colorScheme.from} ${colorScheme.via} ${colorScheme.to} animate-gradient overflow-hidden`}>
+    <div className={`relative min-h-screen bg-gradient-to-br ${colorScheme.from} ${colorScheme.via} ${colorScheme.to} animate-gradient color-transition overflow-hidden`}>
       {/* Ethereal background effects */}
       <div className="absolute inset-0">
-        <div className={`absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-br ${colorScheme.accent1} rounded-full filter blur-3xl animate-pulse-slow`}></div>
-        <div className={`absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-br ${colorScheme.accent2} rounded-full filter blur-3xl animate-pulse-slow delay-1000`}></div>
-        <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br ${colorScheme.accent3} rounded-full filter blur-3xl animate-float`}></div>
+        <div className={`absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-br ${colorScheme.accent1} rounded-full filter blur-3xl animate-pulse-slow gradient-orb`}></div>
+        <div className={`absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-br ${colorScheme.accent2} rounded-full filter blur-3xl animate-pulse-slow delay-1000 gradient-orb`}></div>
+        <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br ${colorScheme.accent3} rounded-full filter blur-3xl animate-float gradient-orb`}></div>
       </div>
 
       <div className="absolute top-0 left-0 right-0 p-4">
