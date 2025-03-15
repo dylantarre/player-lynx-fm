@@ -38,7 +38,7 @@ CONFIG_FILE="$APP_DIR/config.js"
 SUPABASE_URL=${VITE_SUPABASE_URL:-""}
 SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY:-""}
 API_BASE_URL=${VITE_API_BASE_URL:-"https://go.lynx.fm"}
-DEFAULT_COLOR_SCHEME=${VITE_DEFAULT_COLOR_SCHEME:-"2"}  # Default to the amber/orange theme (index 2)
+DEFAULT_COLOR_SCHEME=${VITE_DEFAULT_COLOR_SCHEME:-"4"}  # Default to the cyan/sky theme (index 4)
 
 # Safer way to truncate values that works in more shell environments
 if [ ! -z "$SUPABASE_URL" ]; then
