@@ -24,6 +24,9 @@ export function MusicPlayer() {
   const [currentView, setCurrentView] = useState<View>('player');
   const [audioObjectUrl, setAudioObjectUrl] = useState<string | null>(null);
   const [recentTracks, setRecentTracks] = useState<string[]>([]);
+  const [lowFreq, setLowFreq] = useState(0);
+  const [midFreq, setMidFreq] = useState(0);
+  const [highFreq, setHighFreq] = useState(0);
   const audioRef = useRef<HTMLAudioElement>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
@@ -259,9 +262,15 @@ export function MusicPlayer() {
 
       // Update CSS variables for animation with more pronounced scaling
       if (document.documentElement) {
-        document.documentElement.style.setProperty('--morph-scale-1', `${1 + (lowFreq / 128)}`)  // More dramatic scaling
-        document.documentElement.style.setProperty('--morph-scale-2', `${1 + (midFreq / 128)}`)  // Dividing by 128 instead of 255
-        document.documentElement.style.setProperty('--morph-scale-3', `${1 + (highFreq / 128)}`)  // for stronger effect
+        // Store frequency values in component state for the circular elements
+        setLowFreq(lowFreq);
+        setMidFreq(midFreq);
+        setHighFreq(highFreq);
+        
+        // Update morph background
+        document.documentElement.style.setProperty('--morph-scale-1', `${1 + (lowFreq / 128)}`)
+        document.documentElement.style.setProperty('--morph-scale-2', `${1 + (midFreq / 128)}`)
+        document.documentElement.style.setProperty('--morph-scale-3', `${1 + (highFreq / 128)}`)
       }
 
       animationFrameRef.current = requestAnimationFrame(animate);
@@ -347,10 +356,19 @@ export function MusicPlayer() {
             <div className="p-8">
               <div className="text-center mb-12">
               <div className="relative w-32 h-32 mx-auto mb-8">
-                <div className={`absolute inset-0 bg-gradient-to-br ${colorScheme.accent1} ${colorScheme.accent3} animate-morph shadow-elevated`}></div>
-                <div className={`absolute inset-2 bg-gradient-to-br ${colorScheme.accent2} ${colorScheme.accent1} animate-morph-reverse shadow-elevated`}></div>
+                <div 
+                  className={`absolute inset-0 bg-gradient-to-br ${colorScheme.accent1} ${colorScheme.accent3} animate-morph shadow-elevated`}
+                  style={{ transform: `scale(${1 + (lowFreq / 128)})` }}
+                ></div>
+                <div 
+                  className={`absolute inset-2 bg-gradient-to-br ${colorScheme.accent2} ${colorScheme.accent1} animate-morph-reverse shadow-elevated`}
+                  style={{ transform: `scale(${1 + (midFreq / 128)})` }}
+                ></div>
                 <div className="absolute inset-4 rounded-full bg-gradient-to-br from-white/15 to-transparent backdrop-blur-sm flex items-center justify-center shadow-elevated">
-                  <div className={`w-16 h-16 rounded-full bg-gradient-to-br ${colorScheme.from.replace('from-', 'from-')}/80 ${colorScheme.via.replace('via-', 'to-')}/80 shadow-elevated`} />
+                  <div 
+                    className={`w-16 h-16 rounded-full bg-gradient-to-br ${colorScheme.from.replace('from-', 'from-')}/80 ${colorScheme.via.replace('via-', 'to-')}/80 shadow-elevated`}
+                    style={{ transform: `scale(${1 + (highFreq / 128)})` }}
+                  ></div>
                 </div>
               </div>
               <div className="uppercase tracking-wider text-sm text-teal-300 font-bold mb-2">
