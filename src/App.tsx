@@ -25,9 +25,9 @@ const colorSchemeOptions = [
     from: 'from-cyan-950',
     via: 'via-sky-950',
     to: 'to-slate-900',
-    accent1: 'from-cyan-400/30',
-    accent2: 'from-sky-400/30',
-    accent3: 'from-blue-400/30'
+    accent1: 'from-fuchsia-400/30',
+    accent2: 'from-pink-400/30',
+    accent3: 'from-rose-400/30'
   },
   {
     from: 'from-fuchsia-950',
