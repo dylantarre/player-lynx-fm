@@ -78,12 +78,16 @@ export function MusicPlayer() {
     }
   ];
 
-  const changeColorScheme = () => {
+  const handleColorSchemeChange = () => {
     const currentIndex = colorSchemes.findIndex(
-      scheme => scheme.from === colorScheme?.from
+      (scheme) =>
+        scheme.from === colorScheme.from &&
+        scheme.via === colorScheme.via &&
+        scheme.to === colorScheme.to
     );
     const nextIndex = (currentIndex + 1) % colorSchemes.length;
-    setColorScheme(colorSchemes[nextIndex]);
+    const nextScheme = colorSchemes[nextIndex];
+    setColorScheme(nextScheme);
   };
 
   const handleLogout = async () => {
@@ -343,7 +347,7 @@ export function MusicPlayer() {
       </button>
 
       <button
-        onClick={changeColorScheme}
+        onClick={handleColorSchemeChange}
         className="absolute bottom-4 left-4 text-white/70 hover:text-white transition-all"
         title="Change color scheme"
       >
