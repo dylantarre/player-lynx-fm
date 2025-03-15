@@ -19,12 +19,42 @@ const buildUrl = (path: string): string => {
   const cleanPath = path.startsWith('/') ? path.substring(1) : path;
   
   try {
+    // Make sure the API_BASE_URL is valid
+    let baseUrl = API_BASE_URL;
+    
+    // Ensure the base URL has a protocol
+    if (!baseUrl.startsWith('http://') && !baseUrl.startsWith('https://')) {
+      baseUrl = 'https://' + baseUrl;
+    }
+    
+    // Ensure the base URL ends with a slash for proper path joining
+    if (!baseUrl.endsWith('/')) {
+      baseUrl = baseUrl + '/';
+    }
+    
+    // For debugging
+    console.log('Building URL with base:', baseUrl, 'and path:', cleanPath);
+    
     // Create a URL object to properly handle URL construction
-    const url = new URL(cleanPath, API_BASE_URL);
+    const url = new URL(cleanPath, baseUrl);
     return url.toString();
   } catch (error) {
     console.error('Error building URL:', error);
-    return `${API_BASE_URL}/${cleanPath}`;
+    
+    // Fallback method for URL construction
+    let baseUrl = API_BASE_URL;
+    
+    // Ensure the base URL has a protocol
+    if (!baseUrl.startsWith('http://') && !baseUrl.startsWith('https://')) {
+      baseUrl = 'https://' + baseUrl;
+    }
+    
+    // Ensure the base URL ends with a slash for proper path joining
+    if (!baseUrl.endsWith('/')) {
+      baseUrl = baseUrl + '/';
+    }
+    
+    return baseUrl + cleanPath;
   }
 };
 
