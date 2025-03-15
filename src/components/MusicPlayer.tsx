@@ -260,17 +260,17 @@ export function MusicPlayer() {
       const midFreq = average(dataArray.slice(10, 20));
       const highFreq = average(dataArray.slice(20, 30));
 
-      // Update CSS variables for animation with balanced scaling
+      // Update CSS variables for animation with smaller scaling
       if (document.documentElement) {
         // Store frequency values in component state for the circular elements
         setLowFreq(lowFreq);
         setMidFreq(midFreq);
         setHighFreq(highFreq);
         
-        // Update morph background with moderate effect
-        document.documentElement.style.setProperty('--morph-scale-1', `${1 + (lowFreq / 768) * 0.65}`)
-        document.documentElement.style.setProperty('--morph-scale-2', `${1 + (midFreq / 768) * 0.65}`)
-        document.documentElement.style.setProperty('--morph-scale-3', `${1 + (highFreq / 768) * 0.65}`)
+        // Update morph background with minimal effect
+        document.documentElement.style.setProperty('--morph-scale-1', `${1 + (lowFreq / 1024) * 0.45}`)
+        document.documentElement.style.setProperty('--morph-scale-2', `${1 + (midFreq / 1024) * 0.45}`)
+        document.documentElement.style.setProperty('--morph-scale-3', `${1 + (highFreq / 1024) * 0.45}`)
       }
 
       animationFrameRef.current = requestAnimationFrame(animate);
@@ -357,20 +357,20 @@ export function MusicPlayer() {
               <div className="text-center mb-12">
                 <div 
                   className="relative w-32 h-32 mx-auto mb-8"
-                  style={{ transform: `scale(${1 + (lowFreq / 768) * 0.65})` }}
+                  style={{ transform: `scale(${1 + (lowFreq / 1024) * 0.45})` }}
                 >
                   <div 
                     className={`absolute inset-0 bg-gradient-to-br ${colorScheme.accent1} ${colorScheme.accent3} animate-morph shadow-elevated`}
-                    style={{ transform: `scale(${1 + (midFreq / 768) * 0.65})` }}
+                    style={{ transform: `scale(${1 + (midFreq / 1024) * 0.45})` }}
                   ></div>
                   <div 
                     className={`absolute inset-2 bg-gradient-to-br ${colorScheme.accent2} ${colorScheme.accent1} animate-morph-reverse shadow-elevated`}
-                    style={{ transform: `scale(${1 + (highFreq / 768) * 0.65})` }}
+                    style={{ transform: `scale(${1 + (highFreq / 1024) * 0.45})` }}
                   ></div>
                   <div className="absolute inset-4 rounded-full bg-gradient-to-br from-white/15 to-transparent backdrop-blur-sm flex items-center justify-center shadow-elevated">
                     <div 
                       className={`w-16 h-16 rounded-full bg-gradient-to-br ${colorScheme.from.replace('from-', 'from-')}/80 ${colorScheme.via.replace('via-', 'to-')}/80 shadow-elevated`}
-                      style={{ transform: `scale(${1 + ((lowFreq + midFreq + highFreq) / (768 * 3)) * 0.65})` }}
+                      style={{ transform: `scale(${1 + ((lowFreq + midFreq + highFreq) / (1024 * 3)) * 0.45})` }}
                     ></div>
                   </div>
                 </div>
