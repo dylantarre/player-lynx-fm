@@ -57,7 +57,7 @@ export function Auth() {
           <form onSubmit={handleLogin} className="space-y-6">
             <div>
               <input
-                className="w-full px-4 py-3 bg-white/10 rounded-xl border border-white/10 text-white placeholder-white/50 focus:outline-none focus:border-amber-400/50 font-sans"
+                className="w-full px-4 py-3 bg-white/10 rounded-xl border border-white/10 text-white font-sans placeholder:font-sans placeholder-white/50 focus:outline-none focus:border-amber-400/50"
                 type="email"
                 placeholder="Email"
                 value={email}
@@ -66,7 +66,7 @@ export function Auth() {
             </div>
             <div>
               <input
-                className="w-full px-4 py-3 bg-white/10 rounded-xl border border-white/10 text-white placeholder-white/50 focus:outline-none focus:border-amber-400/50 font-sans"
+                className="w-full px-4 py-3 bg-white/10 rounded-xl border border-white/10 text-white font-sans placeholder:font-sans placeholder-white/50 focus:outline-none focus:border-amber-400/50"
                 type="password"
                 placeholder="Password"
                 value={password}
@@ -98,7 +98,7 @@ export function Auth() {
           <div className="mt-6 text-center">
             <button
               onClick={() => setIsSignUp(!isSignUp)}
-              className="text-white/70 hover:text-white transition-colors font-kaushan"
+              className="text-white/70 hover:text-white transition-colors font-sans"
             >
               {isSignUp ? 'Already have an account? Sign In' : 'Need an account? Sign Up'}
             </button>
