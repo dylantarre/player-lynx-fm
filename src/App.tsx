@@ -6,8 +6,12 @@ import { useEffect, useState, Suspense, createContext } from 'react';
 import { supabase } from './lib/supabase';
 import { User } from '@supabase/supabase-js';
 
-export const ColorSchemeContext = createContext({
-  colorScheme: {
+// Get default color scheme from environment
+const defaultColorSchemeIndex = parseInt(window.ENV?.VITE_DEFAULT_COLOR_SCHEME || '0', 10);
+
+// Define all available color schemes
+const colorSchemeOptions = [
+  {
     from: 'from-indigo-950',
     via: 'via-purple-900',
     to: 'to-slate-900',
@@ -15,20 +19,71 @@ export const ColorSchemeContext = createContext({
     accent2: 'from-orange-400/30',
     accent3: 'from-yellow-400/30'
   },
+  {
+    from: 'from-fuchsia-950',
+    via: 'via-purple-950',
+    to: 'to-slate-900',
+    accent1: 'from-lime-400/30',
+    accent2: 'from-emerald-400/30',
+    accent3: 'from-teal-400/30'
+  },
+  {
+    from: 'from-amber-950',
+    via: 'via-orange-950',
+    to: 'to-slate-900',
+    accent1: 'from-violet-400/30',
+    accent2: 'from-purple-400/30',
+    accent3: 'from-fuchsia-400/30'
+  },
+  {
+    from: 'from-emerald-950',
+    via: 'via-green-950',
+    to: 'to-slate-900',
+    accent1: 'from-pink-400/30',
+    accent2: 'from-rose-400/30',
+    accent3: 'from-red-400/30'
+  },
+  {
+    from: 'from-indigo-950',
+    via: 'via-blue-950',
+    to: 'to-slate-900',
+    accent1: 'from-yellow-400/30',
+    accent2: 'from-amber-400/30',
+    accent3: 'from-orange-400/30'
+  },
+  {
+    from: 'from-violet-950',
+    via: 'via-indigo-950',
+    to: 'to-slate-900',
+    accent1: 'from-emerald-400/30',
+    accent2: 'from-green-400/30',
+    accent3: 'from-lime-400/30'
+  },
+  {
+    from: 'from-cyan-950',
+    via: 'via-sky-950',
+    to: 'to-slate-900',
+    accent1: 'from-fuchsia-400/30',
+    accent2: 'from-pink-400/30',
+    accent3: 'from-rose-400/30'
+  }
+];
+
+// Get the default color scheme based on the index
+const getDefaultColorScheme = () => {
+  const index = Math.min(Math.max(defaultColorSchemeIndex, 0), colorSchemeOptions.length - 1);
+  return colorSchemeOptions[index];
+};
+
+export const ColorSchemeContext = createContext({
+  colorScheme: getDefaultColorScheme(),
   setColorScheme: (scheme: any) => {}
 });
 
 function App() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [colorScheme, setColorScheme] = useState({
-    from: 'from-indigo-950',
-    via: 'via-purple-900',
-    to: 'to-slate-900',
-    accent1: 'from-amber-400/30',
-    accent2: 'from-orange-400/30',
-    accent3: 'from-yellow-400/30'
-  });
+  const [colorScheme, setColorScheme] = useState(getDefaultColorScheme());
 
   useEffect(() => {
     // Get initial session
