@@ -33,23 +33,34 @@ echo "==================================================="
 echo "Updating config.js with environment values..."
 CONFIG_FILE="$APP_DIR/config.js"
 
+# Ensure we have default values if environment variables are not set
+SUPABASE_URL=${VITE_SUPABASE_URL:-""}
+SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY:-""}
+API_BASE_URL=${VITE_API_BASE_URL:-"https://go.lynx.fm:3500"}
+
+# Log the actual values being used (without revealing sensitive info)
+echo "Using the following values:"
+echo " SUPABASE_URL: ${SUPABASE_URL:0:10}... (truncated for security)"
+echo " SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:0:10}... (truncated for security)"
+echo " API_BASE_URL: $API_BASE_URL"
+
 cat > $CONFIG_FILE << EOF
 // This file is generated at runtime by the container
 window.ENV = {
-  VITE_SUPABASE_URL: "${VITE_SUPABASE_URL}",
-  VITE_SUPABASE_ANON_KEY: "${VITE_SUPABASE_ANON_KEY}",
-  VITE_API_BASE_URL: "${VITE_API_BASE_URL}"
+  VITE_SUPABASE_URL: "${SUPABASE_URL}",
+  VITE_SUPABASE_ANON_KEY: "${SUPABASE_ANON_KEY}",
+  VITE_API_BASE_URL: "${API_BASE_URL}"
 };
 
 // Also set LYNX_CONFIG for compatibility
 window.LYNX_CONFIG = {
-  VITE_SUPABASE_URL: "${VITE_SUPABASE_URL}",
-  VITE_SUPABASE_ANON_KEY: "${VITE_SUPABASE_ANON_KEY}",
-  VITE_API_BASE_URL: "${VITE_API_BASE_URL}"
+  VITE_SUPABASE_URL: "${SUPABASE_URL}",
+  VITE_SUPABASE_ANON_KEY: "${SUPABASE_ANON_KEY}",
+  VITE_API_BASE_URL: "${API_BASE_URL}"
 };
 EOF
 
-echo " Configuration file updated successfully"
+echo "Config file created at $CONFIG_FILE"
 echo "==================================================="
 
 # List files in the app directory for debugging
