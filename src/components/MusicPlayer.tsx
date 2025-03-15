@@ -319,7 +319,7 @@ export function MusicPlayer() {
   }, [audioObjectUrl]);
 
   return (
-    <div className={`relative min-h-screen flex items-center justify-center bg-gradient-to-br ${colorScheme.from} ${colorScheme.via} ${colorScheme.to} overflow-hidden`}>
+    <div className={`relative min-h-screen bg-gradient-to-br ${colorScheme.from} ${colorScheme.via} ${colorScheme.to} overflow-hidden`}>
       {/* Ethereal background effects */}
       <div className="absolute inset-0">
         <div className={`absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-br ${colorScheme.accent1} rounded-full filter blur-3xl animate-pulse-slow`}></div>
@@ -327,19 +327,20 @@ export function MusicPlayer() {
         <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br ${colorScheme.accent3} rounded-full filter blur-3xl animate-float`}></div>
       </div>
 
-      <div className="flex items-center justify-between p-4">
+      <div className="absolute top-0 left-0 right-0 p-4">
         <div className="flex items-center gap-2">
           <LynxCat className="w-10 h-10 text-amber-400" />
           <h1 className="text-3xl font-kaushan text-amber-400 leading-loose pb-1">lynx.fm</h1>
         </div>
-        <button
-          onClick={handleLogout}
-          className="absolute top-4 right-4 text-white/70 hover:text-white transition-all"
-          title="Logout"
-        >
-          <LogOut className="w-5 h-5" />
-        </button>
       </div>
+
+      <button
+        onClick={handleLogout}
+        className="absolute top-4 right-4 text-white/70 hover:text-white transition-all"
+        title="Logout"
+      >
+        <LogOut className="w-5 h-5" />
+      </button>
 
       <button
         onClick={changeColorScheme}
@@ -356,138 +357,141 @@ export function MusicPlayer() {
       >
         {currentView === 'player' ? <User className="w-5 h-5" /> : <Music className="w-5 h-5" />}
       </button>
-      <div className="max-w-md w-full bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-xl rounded-3xl shadow-elevated overflow-hidden border border-white/20 transition-all hover:shadow-elevated-hover relative mx-auto mt-8">
-        {/* Morphing background effect */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className={`absolute -inset-1/2 w-[200%] h-[200%] bg-gradient-to-br ${colorScheme.accent1} rounded-full filter blur-3xl opacity-30 scale-[var(--morph-scale-1)]`}></div>
-        </div>
-        
-        {/* Player content */}
-        <div className="relative z-10">
-          {currentView === 'player' ? (
-            <div className="p-8">
-              <div className="text-center mb-12">
-                <div 
-                  className="relative w-32 h-32 mx-auto mb-8"
-                  style={{ transform: `scale(${1 - (lowFreq / 1024) * 0.35}) rotate(${(lowFreq / 1024) * 2}deg)` }}
-                >
+
+      <div className="flex items-center justify-center min-h-screen p-4">
+        <div className="max-w-md w-full bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-xl rounded-3xl shadow-elevated overflow-hidden border border-white/20 transition-all hover:shadow-elevated-hover relative">
+          {/* Morphing background effect */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div className={`absolute -inset-1/2 w-[200%] h-[200%] bg-gradient-to-br ${colorScheme.accent1} rounded-full filter blur-3xl opacity-30 scale-[var(--morph-scale-1)]`}></div>
+          </div>
+          
+          {/* Player content */}
+          <div className="relative z-10">
+            {currentView === 'player' ? (
+              <div className="p-8">
+                <div className="text-center mb-12">
                   <div 
-                    className={`absolute inset-0 bg-gradient-to-br ${colorScheme.accent1} ${colorScheme.accent3} animate-morph shadow-elevated`}
-                    style={{ transform: `scale(${1 + (midFreq / 720) * 0.65}) rotate(${(midFreq / 1024) * -3}deg)` }}
-                  ></div>
-                  <div 
-                    className={`absolute inset-2 bg-gradient-to-br ${colorScheme.accent2} ${colorScheme.accent1} animate-morph-reverse shadow-elevated`}
-                    style={{ transform: `scale(${1 + (highFreq / 840) * 0.45}) rotate(${(highFreq / 1024) * 1.5}deg)` }}
-                  ></div>
-                  <div className="absolute inset-4 rounded-full bg-gradient-to-br from-white/15 to-transparent backdrop-blur-sm flex items-center justify-center shadow-elevated">
+                    className="relative w-32 h-32 mx-auto mb-8"
+                    style={{ transform: `scale(${1 - (lowFreq / 1024) * 0.35}) rotate(${(lowFreq / 1024) * 2}deg)` }}
+                  >
                     <div 
-                      className={`w-16 h-16 rounded-full bg-gradient-to-br ${colorScheme.from.replace('from-', 'from-')}/80 ${colorScheme.via.replace('via-', 'to-')}/80 shadow-elevated`}
-                      style={{ transform: `scale(${1 + ((lowFreq + midFreq + highFreq) / (1024 * 3)) * 0.25})` }}
+                      className={`absolute inset-0 bg-gradient-to-br ${colorScheme.accent1} ${colorScheme.accent3} animate-morph shadow-elevated`}
+                      style={{ transform: `scale(${1 + (midFreq / 720) * 0.65}) rotate(${(midFreq / 1024) * -3}deg)` }}
                     ></div>
+                    <div 
+                      className={`absolute inset-2 bg-gradient-to-br ${colorScheme.accent2} ${colorScheme.accent1} animate-morph-reverse shadow-elevated`}
+                      style={{ transform: `scale(${1 + (highFreq / 840) * 0.45}) rotate(${(highFreq / 1024) * 1.5}deg)` }}
+                    ></div>
+                    <div className="absolute inset-4 rounded-full bg-gradient-to-br from-white/15 to-transparent backdrop-blur-sm flex items-center justify-center shadow-elevated">
+                      <div 
+                        className={`w-16 h-16 rounded-full bg-gradient-to-br ${colorScheme.from.replace('from-', 'from-')}/80 ${colorScheme.via.replace('via-', 'to-')}/80 shadow-elevated`}
+                        style={{ transform: `scale(${1 + ((lowFreq + midFreq + highFreq) / (1024 * 3)) * 0.25})` }}
+                      ></div>
+                    </div>
                   </div>
+                <div className="uppercase tracking-wider text-sm font-kaushan text-teal-300 font-bold leading-loose pb-1 mb-2">
+                  Now Playing
                 </div>
-              <div className="uppercase tracking-wider text-sm font-kaushan text-teal-300 font-bold leading-loose pb-1 mb-2">
-                Now Playing
-              </div>
-              <h2 className="text-3xl font-kaushan text-white leading-loose pb-1">
-                {isLoading ? 'Loading...' : (currentTrack?.title || 'Select a Track')}
-              </h2>
-              <p className="text-emerald-200/80 font-kaushan leading-loose pb-1">
-                {currentTrack?.artist || ''}
-              </p>
-              {serverStatus === false && (
-                <p className="text-red-400 mt-2">Server connection error</p>
-              )}
-              </div>
-            
-              <div className="flex justify-center space-x-6">
-              <button
-                onClick={togglePlay}
-                disabled={!currentTrack || isLoading}
-                className={`p-4 rounded-full bg-gradient-to-r ${colorScheme.from.replace('from-', 'from-')}/80 ${colorScheme.via.replace('via-', 'to-')}/80 text-white hover:${colorScheme.from.replace('from-', 'from-')}/60 hover:${colorScheme.via.replace('via-', 'to-')}/60 transition-all shadow-elevated hover:shadow-elevated-hover backdrop-blur-sm hover:-translate-y-0.5 border border-white/20`}
-              >
-                {isPlaying ? (
-                  <Pause className="w-8 h-8" />
-                ) : (
-                  <Play className="w-8 h-8" />
+                <h2 className="text-3xl font-kaushan text-white leading-loose pb-1">
+                  {isLoading ? 'Loading...' : (currentTrack?.title || 'Select a Track')}
+                </h2>
+                <p className="text-emerald-200/80 font-kaushan leading-loose pb-1">
+                  {currentTrack?.artist || ''}
+                </p>
+                {serverStatus === false && (
+                  <p className="text-red-400 mt-2">Server connection error</p>
                 )}
-              </button>
+                </div>
               
-              <button
-                onClick={stopPlay}
-                disabled={!currentTrack || isLoading}
-                className={`p-4 rounded-full bg-gradient-to-r ${colorScheme.via.replace('via-', 'from-')}/80 ${colorScheme.to.replace('to-', 'to-')}/80 text-white hover:${colorScheme.via.replace('via-', 'from-')}/60 hover:${colorScheme.to.replace('to-', 'to-')}/60 transition-all shadow-elevated hover:shadow-elevated-hover backdrop-blur-sm hover:-translate-y-0.5 border border-white/20`}
-              >
-                <Square className="w-8 h-8" />
-              </button>
-              
-              <button
-                onClick={playRandom}
-                disabled={isLoading || serverStatus === false}
-                className={`p-4 rounded-full bg-gradient-to-r ${colorScheme.from.replace('from-', 'from-')}/80 ${colorScheme.to.replace('to-', 'to-')}/80 text-white hover:${colorScheme.from.replace('from-', 'from-')}/60 hover:${colorScheme.to.replace('to-', 'to-')}/60 transition-all shadow-elevated hover:shadow-elevated-hover backdrop-blur-sm hover:-translate-y-0.5 border border-white/20`}
-              >
-                {isLoading ? (
-                  <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                ) : (
-                  <Shuffle className="w-8 h-8" />
-                )}
-              </button>
-              </div>
-              
-              <audio
-                ref={audioRef}
-                onEnded={() => setIsPlaying(false)}
-                src={currentTrack?.url || ''}
-                preload="auto"
-                onError={(e) => console.error('Audio error:', e)}
-              />
-            </div>
-          ) : (
-            <div className="p-8">
-              <div className="flex justify-end mb-4">
+                <div className="flex justify-center space-x-6">
                 <button
-                  onClick={handleLogout}
-                  className="flex items-center text-white/70 hover:text-red-400 transition-colors font-kaushan leading-loose pb-1"
+                  onClick={togglePlay}
+                  disabled={!currentTrack || isLoading}
+                  className={`p-4 rounded-full bg-gradient-to-r ${colorScheme.from.replace('from-', 'from-')}/80 ${colorScheme.via.replace('via-', 'to-')}/80 text-white hover:${colorScheme.from.replace('from-', 'from-')}/60 hover:${colorScheme.via.replace('via-', 'to-')}/60 transition-all shadow-elevated hover:shadow-elevated-hover backdrop-blur-sm hover:-translate-y-0.5 border border-white/20`}
                 >
-                  <LogOut className="w-5 h-5 mr-1" />
-                  <span>Logout</span>
+                  {isPlaying ? (
+                    <Pause className="w-8 h-8" />
+                  ) : (
+                    <Play className="w-8 h-8" />
+                  )}
                 </button>
-              </div>
-              <div className="flex items-center justify-center mb-8">
-                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-500/80 to-indigo-500/80 flex items-center justify-center shadow-elevated">
-                  <User className="w-12 h-12 text-white" />
+                
+                <button
+                  onClick={stopPlay}
+                  disabled={!currentTrack || isLoading}
+                  className={`p-4 rounded-full bg-gradient-to-r ${colorScheme.via.replace('via-', 'from-')}/80 ${colorScheme.to.replace('to-', 'to-')}/80 text-white hover:${colorScheme.via.replace('via-', 'from-')}/60 hover:${colorScheme.to.replace('to-', 'to-')}/60 transition-all shadow-elevated hover:shadow-elevated-hover backdrop-blur-sm hover:-translate-y-0.5 border border-white/20`}
+                >
+                  <Square className="w-8 h-8" />
+                </button>
+                
+                <button
+                  onClick={playRandom}
+                  disabled={isLoading || serverStatus === false}
+                  className={`p-4 rounded-full bg-gradient-to-r ${colorScheme.from.replace('from-', 'from-')}/80 ${colorScheme.to.replace('to-', 'to-')}/80 text-white hover:${colorScheme.from.replace('from-', 'from-')}/60 hover:${colorScheme.to.replace('to-', 'to-')}/60 transition-all shadow-elevated hover:shadow-elevated-hover backdrop-blur-sm hover:-translate-y-0.5 border border-white/20`}
+                >
+                  {isLoading ? (
+                    <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  ) : (
+                    <Shuffle className="w-8 h-8" />
+                  )}
+                </button>
                 </div>
+                
+                <audio
+                  ref={audioRef}
+                  onEnded={() => setIsPlaying(false)}
+                  src={currentTrack?.url || ''}
+                  preload="auto"
+                  onError={(e) => console.error('Audio error:', e)}
+                />
               </div>
-
-              <div className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-white/60 mb-2 font-kaushan leading-loose pb-1">Email</label>
-                  <div className="text-white font-kaushan leading-loose pb-1">{userData.email}</div>
+            ) : (
+              <div className="p-8">
+                <div className="flex justify-end mb-4">
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center text-white/70 hover:text-red-400 transition-colors font-kaushan leading-loose pb-1"
+                  >
+                    <LogOut className="w-5 h-5 mr-1" />
+                    <span>Logout</span>
+                  </button>
                 </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-white/60 mb-2 font-kaushan leading-loose pb-1">Member Since</label>
-                  <div className="text-white font-kaushan leading-loose pb-1">
-                    {userData.created_at ? new Date(userData.created_at).toLocaleDateString() : ''}
+                <div className="flex items-center justify-center mb-8">
+                  <div className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-500/80 to-indigo-500/80 flex items-center justify-center shadow-elevated">
+                    <User className="w-12 h-12 text-white" />
                   </div>
                 </div>
 
-                <div className="pt-4 border-t border-white/10">
-                  <h3 className="text-lg font-semibold text-white leading-loose pb-1 font-kaushan">Preferences</h3>
-                  <div className="space-y-4">
-                    <label className="flex items-center space-x-3">
-                      <input type="checkbox" className="rounded bg-white/10 border-white/20" />
-                      <span className="text-white font-kaushan leading-loose pb-1">Enable notifications</span>
-                    </label>
-                    <label className="flex items-center space-x-3">
-                      <input type="checkbox" className="rounded bg-white/10 border-white/20" />
-                      <span className="text-white font-kaushan leading-loose pb-1">Auto-play next track</span>
-                    </label>
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-medium text-white/60 mb-2 font-kaushan leading-loose pb-1">Email</label>
+                    <div className="text-white font-kaushan leading-loose pb-1">{userData.email}</div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-white/60 mb-2 font-kaushan leading-loose pb-1">Member Since</label>
+                    <div className="text-white font-kaushan leading-loose pb-1">
+                      {userData.created_at ? new Date(userData.created_at).toLocaleDateString() : ''}
+                    </div>
+                  </div>
+
+                  <div className="pt-4 border-t border-white/10">
+                    <h3 className="text-lg font-semibold text-white leading-loose pb-1 font-kaushan">Preferences</h3>
+                    <div className="space-y-4">
+                      <label className="flex items-center space-x-3">
+                        <input type="checkbox" className="rounded bg-white/10 border-white/20" />
+                        <span className="text-white font-kaushan leading-loose pb-1">Enable notifications</span>
+                      </label>
+                      <label className="flex items-center space-x-3">
+                        <input type="checkbox" className="rounded bg-white/10 border-white/20" />
+                        <span className="text-white font-kaushan leading-loose pb-1">Auto-play next track</span>
+                      </label>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </div>
