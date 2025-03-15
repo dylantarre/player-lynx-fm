@@ -257,11 +257,11 @@ export function MusicPlayer() {
       const midFreq = average(dataArray.slice(10, 20));
       const highFreq = average(dataArray.slice(20, 30));
 
-      // Update CSS variables for animation
+      // Update CSS variables for animation with more pronounced scaling
       if (document.documentElement) {
-        document.documentElement.style.setProperty('--morph-scale-1', `${1 + (lowFreq / 255)}`)
-        document.documentElement.style.setProperty('--morph-scale-2', `${1 + (midFreq / 255)}`)
-        document.documentElement.style.setProperty('--morph-scale-3', `${1 + (highFreq / 255)}`)
+        document.documentElement.style.setProperty('--morph-scale-1', `${1 + (lowFreq / 128)}`)  // More dramatic scaling
+        document.documentElement.style.setProperty('--morph-scale-2', `${1 + (midFreq / 128)}`)  // Dividing by 128 instead of 255
+        document.documentElement.style.setProperty('--morph-scale-3', `${1 + (highFreq / 128)}`)  // for stronger effect
       }
 
       animationFrameRef.current = requestAnimationFrame(animate);
