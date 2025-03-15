@@ -1,6 +1,17 @@
 import { supabase } from './supabase';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://go.lynx.fm';
+// Define a type for the global window with ENV property
+interface WindowWithEnv extends Window {
+  ENV?: {
+    VITE_SUPABASE_URL?: string;
+    VITE_SUPABASE_ANON_KEY?: string;
+    VITE_API_BASE_URL?: string;
+  };
+}
+
+// Try to get environment variables from window.ENV first (for production)
+// then fall back to import.meta.env (for development)
+const API_BASE_URL = ((window as WindowWithEnv).ENV?.VITE_API_BASE_URL) || import.meta.env.VITE_API_BASE_URL || 'https://go.lynx.fm';
 
 // Helper function to ensure proper URL construction
 const buildUrl = (path: string): string => {
