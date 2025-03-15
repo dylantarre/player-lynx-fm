@@ -1,0 +1,23 @@
+name: lynx-fm-player
+region: nyc
+services:
+- name: web
+  github:
+    branch: main
+    deploy_on_push: true
+    repo: dylantarre/player-lynx-fm
+  build_command: npm ci && npm run build
+  environment_slug: node-js
+  envs:
+  - key: VITE_SUPABASE_URL
+    scope: RUN_AND_BUILD_TIME
+    value: ${VITE_SUPABASE_URL}
+  - key: VITE_SUPABASE_ANON_KEY
+    scope: RUN_AND_BUILD_TIME
+    value: ${VITE_SUPABASE_ANON_KEY}
+  - key: VITE_API_BASE_URL
+    scope: RUN_AND_BUILD_TIME
+    value: ${VITE_API_BASE_URL}
+  routes:
+  - path: /
+  source_dir: /

@@ -1,0 +1,41 @@
+{
+  "name": "lynx-fm-player",
+  "services": [
+    {
+      "name": "web",
+      "github": {
+        "repo": "dylantarre/player-lynx-fm",
+        "branch": "main",
+        "deploy_on_push": true
+      },
+      "build_command": "npm ci && npm run build",
+      "run_command": "npx serve -s dist",
+      "environment_slug": "node-js",
+      "instance_size_slug": "basic-xxs",
+      "instance_count": 1,
+      "routes": [
+        {
+          "path": "/"
+        }
+      ],
+      "envs": [
+        {
+          "key": "VITE_SUPABASE_URL",
+          "scope": "RUN_AND_BUILD_TIME",
+          "type": "SECRET"
+        },
+        {
+          "key": "VITE_SUPABASE_ANON_KEY",
+          "scope": "RUN_AND_BUILD_TIME",
+          "type": "SECRET"
+        },
+        {
+          "key": "VITE_API_BASE_URL",
+          "scope": "RUN_AND_BUILD_TIME",
+          "value": "http://go.lynx.fm:3500"
+        }
+      ]
+    }
+  ],
+  "region": "nyc"
+}

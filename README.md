@@ -1,11 +1,11 @@
 # LynxFM Docker Deployment Guide
 
-This guide explains how to build and deploy the LynxFM application using Docker and Portainer.
+This guide explains how to build and deploy the LynxFM application using Docker, Portainer, or Digital Ocean App Platform.
 
 ## Prerequisites
 
 - Docker installed on your build machine
-- Access to a Portainer instance
+- Access to a Portainer instance or Digital Ocean account
 - Supabase account with API credentials
 
 ## Local Build and Test
@@ -75,6 +75,52 @@ docker push your-registry/lynx-fm:latest
 
 4. Deploy the container.
 
+## Deploying to Digital Ocean App Platform
+
+The Lynx FM Player can be easily deployed to Digital Ocean App Platform, which provides a simple way to host your application with automatic SSL, global CDN, and easy scaling.
+
+### Prerequisites for Digital Ocean Deployment
+
+1. A Digital Ocean account
+2. Your code pushed to a GitHub repository
+3. Supabase credentials (URL and Anonymous Key)
+
+### Deployment Steps
+
+1. Log in to your Digital Ocean account and navigate to the App Platform section.
+
+2. Click "Create App" and select your GitHub repository.
+
+3. Configure your app with the following settings:
+   - Source Directory: `/` (root of the repository)
+   - Build Command: `npm ci && npm run build`
+   - Run Command: `npm start`
+
+4. Add the following environment variables:
+   - `VITE_SUPABASE_URL`: Your Supabase URL
+   - `VITE_SUPABASE_ANON_KEY`: Your Supabase Anonymous Key
+   - `VITE_API_BASE_URL`: `http://go.lynx.fm:3500`
+
+5. Choose your plan (Basic plan is sufficient for most use cases).
+
+6. Click "Launch App" to deploy your application.
+
+### Using the Configuration Files
+
+This repository includes configuration files to make deployment easier:
+
+- `.do/app.yaml`: Digital Ocean App Platform configuration
+- `do-app.json`: Alternative configuration format for Digital Ocean CLI
+- `serve.json`: Configuration for serving the static site with proper routing
+
+You can use these files with the Digital Ocean CLI for automated deployments:
+
+```bash
+doctl apps create --spec .do/app.yaml
+```
+
+Note: Before using the configuration files, update the GitHub repository URL in the files to point to your repository.
+
 ## Environment Variables
 
 | Variable | Description | Required |
@@ -96,6 +142,15 @@ docker push your-registry/lynx-fm:latest
 - The default exposed port is 8080, but you can change this in your deployment
 - The application uses Nginx to serve the static files and handle SPA routing
 - The container includes a health check that pings the root URL
+
+## Deployment Configurations
+
+- **Production**: Running at lynx.fm through Cloudflare tunnel (192.168.50.83:8080)
+- **Local Development**: Running on localhost:5179 (Vite) or localhost:8080 (Docker)
+- **API Server**: Always using go.lynx.fm:3500 for audio streaming
+- **Deployment Pipeline Options**: 
+  - GitHub → Portainer → lynx.fm
+  - GitHub → Digital Ocean App Platform
 
 ## Troubleshooting
 
