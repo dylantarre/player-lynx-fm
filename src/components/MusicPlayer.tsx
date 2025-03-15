@@ -319,7 +319,7 @@ export function MusicPlayer() {
   }, [audioObjectUrl]);
 
   return (
-    <div className={`relative min-h-screen bg-gradient-to-br ${colorScheme.from} ${colorScheme.via} ${colorScheme.to} overflow-hidden`}>
+    <div className={`relative min-h-screen bg-gradient-to-br ${colorScheme.from} ${colorScheme.via} ${colorScheme.to} animate-gradient overflow-hidden`}>
       {/* Ethereal background effects */}
       <div className="absolute inset-0">
         <div className={`absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-br ${colorScheme.accent1} rounded-full filter blur-3xl animate-pulse-slow`}></div>
