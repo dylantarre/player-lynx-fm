@@ -19,10 +19,20 @@
   background-size: 400% 400%;
 }
 
-.color-transition {
-  transition: all 1s ease-in-out;
+/* Base transitions for color changes */
+.transition-colors-smooth {
+  transition-property: background-color, background-image;
+  transition-duration: 0.5s;
+  transition-timing-function: ease-in-out;
 }
 
-.gradient-orb {
-  transition: background-image 1s ease-in-out;
+/* Specific transition for gradient orbs */
+.transition-gradient {
+  transition: all 0.5s ease-in-out;
+}
+
+/* Background gradient transitions */
+.bg-gradient {
+  background-size: 200% 200%;
+  transition: all 0.5s ease-in-out;
 }

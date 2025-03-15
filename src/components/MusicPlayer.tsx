@@ -323,28 +323,29 @@ export function MusicPlayer() {
   }, [audioObjectUrl]);
 
   return (
-    <div className={`relative min-h-screen bg-gradient-to-br ${colorScheme.from} ${colorScheme.via} ${colorScheme.to} animate-gradient color-transition overflow-hidden`}>
+    <div className={`relative min-h-screen bg-gradient-to-br ${colorScheme.from} ${colorScheme.via} ${colorScheme.to} animate-gradient transition-colors-smooth bg-gradient overflow-hidden`}>
       {/* Ethereal background effects */}
       <div className="absolute inset-0">
-        <div className={`absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-br ${colorScheme.accent1} rounded-full filter blur-3xl animate-pulse-slow gradient-orb`}></div>
-        <div className={`absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-br ${colorScheme.accent2} rounded-full filter blur-3xl animate-pulse-slow delay-1000 gradient-orb`}></div>
-        <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br ${colorScheme.accent3} rounded-full filter blur-3xl animate-float gradient-orb`}></div>
+        <div className={`absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-br ${colorScheme.accent1} rounded-full filter blur-3xl animate-pulse-slow transition-gradient`}></div>
+        <div className={`absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-br ${colorScheme.accent2} rounded-full filter blur-3xl animate-pulse-slow delay-1000 transition-gradient`}></div>
+        <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br ${colorScheme.accent3} rounded-full filter blur-3xl animate-float transition-gradient`}></div>
       </div>
 
       <div className="absolute top-0 left-0 right-0 p-4">
-        <div className="flex items-center gap-2">
-          <LynxCat className="w-10 h-10 text-amber-400" />
-          <h1 className="text-3xl font-kaushan text-amber-400">lynx.fm</h1>
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <LynxCat className="w-8 h-8 text-amber-400" />
+            <span className="text-2xl text-amber-400 font-kaushan">lynx.fm</span>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="flex items-center text-white/70 hover:text-red-400 transition-colors"
+          >
+            <LogOut className="w-5 h-5 mr-1" />
+            <span>Logout</span>
+          </button>
         </div>
       </div>
-
-      <button
-        onClick={handleLogout}
-        className="absolute top-4 right-4 text-white/70 hover:text-white transition-all"
-        title="Logout"
-      >
-        <LogOut className="w-5 h-5" />
-      </button>
 
       <button
         onClick={handleColorSchemeChange}
