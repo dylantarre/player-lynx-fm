@@ -36,20 +36,20 @@ export function MusicPlayer() {
 
   const colorSchemes = [
     {
-      from: 'from-pink-950',
-      via: 'via-fuchsia-950',
-      to: 'to-slate-900',
-      accent1: 'from-cyan-400/30',
-      accent2: 'from-teal-400/30',
-      accent3: 'from-emerald-400/30'
-    },
-    {
       from: 'from-cyan-950',
       via: 'via-sky-950',
       to: 'to-slate-900',
-      accent1: 'from-fuchsia-400/30',
-      accent2: 'from-pink-400/30',
-      accent3: 'from-rose-400/30'
+      accent1: 'from-cyan-400/30',
+      accent2: 'from-sky-400/30',
+      accent3: 'from-blue-400/30'
+    },
+    {
+      from: 'from-fuchsia-950',
+      via: 'via-purple-950',
+      to: 'to-slate-900',
+      accent1: 'from-lime-400/30',
+      accent2: 'from-emerald-400/30',
+      accent3: 'from-teal-400/30'
     },
     {
       from: 'from-emerald-950',
