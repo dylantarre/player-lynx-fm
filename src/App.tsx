@@ -1,4 +1,3 @@
-import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Auth } from './components/Auth';
 import { MusicPlayer } from './components/MusicPlayer';
@@ -7,6 +6,17 @@ import { supabase } from './lib/supabase';
 import { User } from '@supabase/supabase-js';
 
 // Get default color scheme from environment
+declare global {
+  interface Window {
+    ENV?: {
+      VITE_DEFAULT_COLOR_SCHEME?: string;
+      VITE_SUPABASE_URL?: string;
+      VITE_SUPABASE_ANON_KEY?: string;
+      VITE_API_BASE_URL?: string;
+    };
+  }
+}
+
 const defaultColorSchemeIndex = parseInt(window.ENV?.VITE_DEFAULT_COLOR_SCHEME || '0', 10);
 
 // Define all available color schemes
@@ -59,9 +69,19 @@ const getDefaultColorScheme = () => {
   return colorSchemeOptions[index];
 };
 
+interface ColorScheme {
+  from: string;
+  via: string;
+  to: string;
+  accent1: string;
+  accent2: string;
+  accent3: string;
+}
+
 export const ColorSchemeContext = createContext({
   colorScheme: getDefaultColorScheme(),
-  setColorScheme: (scheme: any) => {}
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  setColorScheme: (_scheme: ColorScheme) => {}
 });
 
 function App() {
