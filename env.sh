@@ -37,7 +37,7 @@ CONFIG_FILE="$APP_DIR/config.js"
 # Use empty defaults to avoid hardcoding secrets
 SUPABASE_URL=${VITE_SUPABASE_URL:-""}
 SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY:-""}
-API_BASE_URL=${VITE_API_BASE_URL:-"https://go.lynx.fm"}
+API_BASE_URL=${VITE_API_BASE_URL:-"https://go.lynx.fm:3500"}
 DEFAULT_COLOR_SCHEME=${VITE_DEFAULT_COLOR_SCHEME:-"0"}  # Default to the cyan/sky theme (index 0)
 
 # Safer way to truncate values that works in more shell environments
@@ -118,7 +118,7 @@ echo "==================================================="
 echo "Container hostname: $(hostname)"
 echo "Container IP: $(hostname -i 2>/dev/null || echo 'Unable to determine IP')"
 echo "DNS resolution for go.lynx.fm: $(getent hosts go.lynx.fm 2>/dev/null || echo 'Failed to resolve')"
-echo "Curl test to API: $(curl -s -o /dev/null -w '%{http_code}' https://go.lynx.fm/health 2>/dev/null || echo 'Failed to connect')"
+echo "Curl test to API: $(curl -s -o /dev/null -w '%{http_code}' https://go.lynx.fm:3500/health 2>/dev/null || echo 'Failed to connect')"
 echo "==================================================="
 
 echo "Environment variable injection completed successfully"
