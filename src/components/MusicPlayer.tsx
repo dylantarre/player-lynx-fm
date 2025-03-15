@@ -392,7 +392,7 @@ export function MusicPlayer() {
                 <div className="uppercase tracking-wider text-sm text-teal-300 font-sans font-bold mb-2">
                   Now Playing
                 </div>
-                <h2 className="text-3xl text-white font-sans mb-2">
+                <h2 className="text-3xl text-white font-sans font-bold mb-2">
                   {isLoading ? 'Loading...' : (currentTrack?.title || 'Select a Track')}
                 </h2>
                 <p className="text-emerald-200/80 font-sans">

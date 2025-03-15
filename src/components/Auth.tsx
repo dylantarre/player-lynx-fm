@@ -52,8 +52,6 @@ export function Auth() {
               <LynxCat className="w-10 h-10 text-amber-400" />
               <h1 className="text-3xl font-kaushan text-amber-400 text-center">lynx.fm</h1>
             </div>
-            <h2 className="text-2xl font-sans text-white font-semibold mb-2">{isSignUp ? 'Create Account' : 'Welcome Back'}</h2>
-            <p className="font-sans text-white/60">{isSignUp ? 'Sign up to start listening' : 'Sign in to continue listening'}</p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-6">
