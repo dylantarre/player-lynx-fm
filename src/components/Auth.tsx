@@ -52,14 +52,14 @@ export function Auth() {
               <LynxCat className="w-10 h-10 text-amber-400" />
               <h1 className="text-3xl font-kaushan text-amber-400 text-center">lynx.fm</h1>
             </div>
-            <h2 className="text-2xl text-white font-semibold mb-2">{isSignUp ? 'Create Account' : 'Welcome Back'}</h2>
-            <p className="text-white/60">{isSignUp ? 'Sign up to start listening' : 'Sign in to continue listening'}</p>
+            <h2 className="text-2xl font-sans text-white font-semibold mb-2">{isSignUp ? 'Create Account' : 'Welcome Back'}</h2>
+            <p className="font-sans text-white/60">{isSignUp ? 'Sign up to start listening' : 'Sign in to continue listening'}</p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-6">
             <div>
               <input
-                className="w-full px-4 py-3 bg-white/10 rounded-xl border border-white/10 text-white placeholder-white/50 focus:outline-none focus:border-amber-400/50"
+                className="w-full px-4 py-3 bg-white/10 rounded-xl border border-white/10 text-white placeholder-white/50 focus:outline-none focus:border-amber-400/50 font-sans"
                 type="email"
                 placeholder="Email"
                 value={email}
@@ -68,7 +68,7 @@ export function Auth() {
             </div>
             <div>
               <input
-                className="w-full px-4 py-3 bg-white/10 rounded-xl border border-white/10 text-white placeholder-white/50 focus:outline-none focus:border-amber-400/50"
+                className="w-full px-4 py-3 bg-white/10 rounded-xl border border-white/10 text-white placeholder-white/50 focus:outline-none focus:border-amber-400/50 font-sans"
                 type="password"
                 placeholder="Password"
                 value={password}
@@ -77,7 +77,7 @@ export function Auth() {
             </div>
             <div>
               <button
-                className={`w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-amber-400 to-yellow-400 text-amber-950 rounded-xl font-medium hover:from-amber-300 hover:to-yellow-300 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-transparent disabled:opacity-50 disabled:cursor-not-allowed transition-all`}
+                className={`w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-amber-400 to-yellow-400 text-amber-950 rounded-xl font-sans font-medium hover:from-amber-300 hover:to-yellow-300 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-transparent disabled:opacity-50 disabled:cursor-not-allowed transition-all`}
                 disabled={loading}
               >
                 {loading ? (
@@ -100,7 +100,7 @@ export function Auth() {
           <div className="mt-6 text-center">
             <button
               onClick={() => setIsSignUp(!isSignUp)}
-              className="text-white/70 hover:text-white transition-colors"
+              className="text-white/70 hover:text-white transition-colors font-sans"
             >
               {isSignUp ? 'Already have an account? Sign In' : 'Need an account? Sign Up'}
             </button>

@@ -389,13 +389,13 @@ export function MusicPlayer() {
                       ></div>
                     </div>
                   </div>
-                <div className="uppercase tracking-wider text-sm text-teal-300 font-bold mb-2">
+                <div className="uppercase tracking-wider text-sm text-teal-300 font-sans font-bold mb-2">
                   Now Playing
                 </div>
-                <h2 className="text-3xl text-white mb-2">
+                <h2 className="text-3xl text-white font-sans mb-2">
                   {isLoading ? 'Loading...' : (currentTrack?.title || 'Select a Track')}
                 </h2>
-                <p className="text-emerald-200/80">
+                <p className="text-emerald-200/80 font-sans">
                   {currentTrack?.artist || ''}
                 </p>
                 {serverStatus === false && (
@@ -464,27 +464,27 @@ export function MusicPlayer() {
 
                 <div className="space-y-6">
                   <div>
-                    <label className="block text-sm font-medium text-white/60 mb-2">Email</label>
-                    <div className="text-white">{userData.email}</div>
+                    <label className="block text-sm font-sans font-medium text-white/60 mb-2">Email</label>
+                    <div className="text-white font-sans">{userData.email}</div>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-white/60 mb-2">Member Since</label>
-                    <div className="text-white">
+                    <label className="block text-sm font-sans font-medium text-white/60 mb-2">Member Since</label>
+                    <div className="text-white font-sans">
                       {userData.created_at ? new Date(userData.created_at).toLocaleDateString() : ''}
                     </div>
                   </div>
 
                   <div className="pt-4 border-t border-white/10">
-                    <h3 className="text-lg font-semibold text-white mb-4">Preferences</h3>
+                    <h3 className="text-lg font-sans font-semibold text-white mb-4">Preferences</h3>
                     <div className="space-y-4">
                       <label className="flex items-center space-x-3">
                         <input type="checkbox" className="rounded bg-white/10 border-white/20" />
-                        <span className="text-white">Enable notifications</span>
+                        <span className="text-white font-sans">Enable notifications</span>
                       </label>
                       <label className="flex items-center space-x-3">
                         <input type="checkbox" className="rounded bg-white/10 border-white/20" />
-                        <span className="text-white">Auto-play next track</span>
+                        <span className="text-white font-sans">Auto-play next track</span>
                       </label>
                     </div>
                   </div>
