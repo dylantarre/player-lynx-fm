@@ -44,33 +44,19 @@ const buildUrl = (path: string): string => {
   // Remove leading slash from path if present
   const cleanPath = path.startsWith('/') ? path.substring(1) : path;
   
-  try {
-    // Don't use URL constructor, use simple string concatenation
-    let baseUrl = API_BASE_URL;
-    
-    // Remove trailing slash from base URL if present
-    if (baseUrl.endsWith('/')) {
-      baseUrl = baseUrl.slice(0, -1);
-    }
-    
-    // For debugging
-    console.log('🔗 Building URL:', `${baseUrl}/${cleanPath}`);
-    
-    // Simple string concatenation instead of URL constructor
-    return `${baseUrl}/${cleanPath}`;
-  } catch (error) {
-    console.error('❌ Error building URL:', error);
-    
-    // Fallback method for URL construction
-    let baseUrl = API_BASE_URL;
-    
-    // Remove trailing slash from base URL if present
-    if (baseUrl.endsWith('/')) {
-      baseUrl = baseUrl.slice(0, -1);
-    }
-    
-    return `${baseUrl}/${cleanPath}`;
+  // Don't use URL constructor at all, use simple string concatenation
+  let baseUrl = API_BASE_URL;
+  
+  // Remove trailing slash from base URL if present
+  if (baseUrl.endsWith('/')) {
+    baseUrl = baseUrl.slice(0, -1);
   }
+  
+  // For debugging
+  console.log('🔗 Building URL:', `${baseUrl}/${cleanPath}`);
+  
+  // Simple string concatenation
+  return `${baseUrl}/${cleanPath}`;
 };
 
 // Define types
@@ -234,9 +220,13 @@ export const lynxApi = {
   // Helper method to create an authenticated audio source
   async createAuthenticatedAudioSource(trackId: string): Promise<{ url: string; token: string | null }> {
     const token = await getAuthToken();
+    const trackUrl = buildUrl(`/tracks/${trackId}`);
+    
+    console.log(`Creating authenticated audio source for track ${trackId}`);
+    console.log(`Track URL: ${trackUrl}`);
     
     return {
-      url: buildUrl(`/tracks/${trackId}`),
+      url: trackUrl,
       token
     };
   }
