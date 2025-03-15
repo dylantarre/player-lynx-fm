@@ -330,7 +330,7 @@ export function MusicPlayer() {
       <div className="absolute top-0 left-0 right-0 p-4">
         <div className="flex items-center gap-2">
           <LynxCat className="w-10 h-10 text-amber-400" />
-          <h1 className="text-3xl font-kaushan text-amber-400 leading-loose pb-1">lynx.fm</h1>
+          <h1 className="text-3xl font-kaushan text-amber-400">lynx.fm</h1>
         </div>
       </div>
 
@@ -389,13 +389,13 @@ export function MusicPlayer() {
                       ></div>
                     </div>
                   </div>
-                <div className="uppercase tracking-wider text-sm font-kaushan text-teal-300 font-bold leading-loose pb-1 mb-2">
+                <div className="uppercase tracking-wider text-sm text-teal-300 font-bold mb-2">
                   Now Playing
                 </div>
-                <h2 className="text-3xl font-kaushan text-white leading-loose pb-1">
+                <h2 className="text-3xl text-white mb-2">
                   {isLoading ? 'Loading...' : (currentTrack?.title || 'Select a Track')}
                 </h2>
-                <p className="text-emerald-200/80 font-kaushan leading-loose pb-1">
+                <p className="text-emerald-200/80">
                   {currentTrack?.artist || ''}
                 </p>
                 {serverStatus === false && (
@@ -450,7 +450,7 @@ export function MusicPlayer() {
                 <div className="flex justify-end mb-4">
                   <button
                     onClick={handleLogout}
-                    className="flex items-center text-white/70 hover:text-red-400 transition-colors font-kaushan leading-loose pb-1"
+                    className="flex items-center text-white/70 hover:text-red-400 transition-colors"
                   >
                     <LogOut className="w-5 h-5 mr-1" />
                     <span>Logout</span>
@@ -464,27 +464,27 @@ export function MusicPlayer() {
 
                 <div className="space-y-6">
                   <div>
-                    <label className="block text-sm font-medium text-white/60 mb-2 font-kaushan leading-loose pb-1">Email</label>
-                    <div className="text-white font-kaushan leading-loose pb-1">{userData.email}</div>
+                    <label className="block text-sm font-medium text-white/60 mb-2">Email</label>
+                    <div className="text-white">{userData.email}</div>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-white/60 mb-2 font-kaushan leading-loose pb-1">Member Since</label>
-                    <div className="text-white font-kaushan leading-loose pb-1">
+                    <label className="block text-sm font-medium text-white/60 mb-2">Member Since</label>
+                    <div className="text-white">
                       {userData.created_at ? new Date(userData.created_at).toLocaleDateString() : ''}
                     </div>
                   </div>
 
                   <div className="pt-4 border-t border-white/10">
-                    <h3 className="text-lg font-semibold text-white leading-loose pb-1 font-kaushan">Preferences</h3>
+                    <h3 className="text-lg font-semibold text-white mb-4">Preferences</h3>
                     <div className="space-y-4">
                       <label className="flex items-center space-x-3">
                         <input type="checkbox" className="rounded bg-white/10 border-white/20" />
-                        <span className="text-white font-kaushan leading-loose pb-1">Enable notifications</span>
+                        <span className="text-white">Enable notifications</span>
                       </label>
                       <label className="flex items-center space-x-3">
                         <input type="checkbox" className="rounded bg-white/10 border-white/20" />
-                        <span className="text-white font-kaushan leading-loose pb-1">Auto-play next track</span>
+                        <span className="text-white">Auto-play next track</span>
                       </label>
                     </div>
                   </div>
