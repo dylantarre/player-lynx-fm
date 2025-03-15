@@ -40,6 +40,13 @@ window.ENV = {
   VITE_SUPABASE_ANON_KEY: "${VITE_SUPABASE_ANON_KEY}",
   VITE_API_BASE_URL: "${VITE_API_BASE_URL}"
 };
+
+// Also set LYNX_CONFIG for compatibility
+window.LYNX_CONFIG = {
+  VITE_SUPABASE_URL: "${VITE_SUPABASE_URL}",
+  VITE_SUPABASE_ANON_KEY: "${VITE_SUPABASE_ANON_KEY}",
+  VITE_API_BASE_URL: "${VITE_API_BASE_URL}"
+};
 EOF
 
 echo " Configuration file updated successfully"
