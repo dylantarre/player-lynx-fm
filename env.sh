@@ -34,14 +34,27 @@ echo "Updating config.js with environment values..."
 CONFIG_FILE="$APP_DIR/config.js"
 
 # Ensure we have default values if environment variables are not set
-SUPABASE_URL=${VITE_SUPABASE_URL}
-SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY}
-API_BASE_URL=${VITE_API_BASE_URL}
+# Use empty defaults to avoid hardcoding secrets
+SUPABASE_URL=${VITE_SUPABASE_URL:-""}
+SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY:-""}
+API_BASE_URL=${VITE_API_BASE_URL:-"https://go.lynx.fm"}
 
-# Log the actual values being used (without revealing sensitive info)
+# Safer way to truncate values that works in more shell environments
+if [ ! -z "$SUPABASE_URL" ]; then
+  SUPABASE_URL_DISPLAY="$(echo $SUPABASE_URL | cut -c 1-10)... (truncated)"
+else
+  SUPABASE_URL_DISPLAY="Not set"
+fi
+
+if [ ! -z "$SUPABASE_ANON_KEY" ]; then
+  SUPABASE_ANON_KEY_DISPLAY="$(echo $SUPABASE_ANON_KEY | cut -c 1-10)... (truncated)"
+else
+  SUPABASE_ANON_KEY_DISPLAY="Not set"
+fi
+
 echo "Using the following values:"
-echo " SUPABASE_URL: ${SUPABASE_URL:0:10}... (truncated for security)"
-echo " SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:0:10}... (truncated for security)"
+echo " SUPABASE_URL: $SUPABASE_URL_DISPLAY"
+echo " SUPABASE_ANON_KEY: $SUPABASE_ANON_KEY_DISPLAY"
 echo " API_BASE_URL: $API_BASE_URL"
 
 cat > $CONFIG_FILE << EOF
@@ -95,6 +108,17 @@ find $APP_DIR -type f -name "*.js" | while read -r file; do
     sed -i "s|https://go.lynx.fm:3500|$VITE_API_BASE_URL|g" $file
   fi
 done
+
+echo "==================================================="
+echo "Environment Debugging Information:"
+echo "==================================================="
+echo "Container hostname: $(hostname)"
+echo "Container IP: $(hostname -i 2>/dev/null || echo 'Unable to determine IP')"
+echo "DNS resolution for go.lynx.fm: $(getent hosts go.lynx.fm 2>/dev/null || echo 'Failed to resolve')"
+echo "Curl test to API: $(curl -s -o /dev/null -w '%{http_code}' https://go.lynx.fm/health 2>/dev/null || echo 'Failed to connect')"
+echo "==================================================="
+
+echo "Environment variable injection completed successfully"
 
 # Start nginx
 exec "$@"
