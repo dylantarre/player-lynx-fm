@@ -107,8 +107,13 @@ function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-500 to-indigo-600">
-        <div className="text-white text-xl">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-pink-950 via-fuchsia-950 to-slate-900 animate-gradient">
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-br from-cyan-400/30 rounded-full filter blur-3xl animate-pulse-slow"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-br from-teal-400/30 rounded-full filter blur-3xl animate-pulse-slow delay-1000"></div>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-emerald-400/30 rounded-full filter blur-3xl animate-float"></div>
+        </div>
+        <div className="text-white/70 text-xl font-kaushan relative z-10">Loading...</div>
       </div>
     );
   }
