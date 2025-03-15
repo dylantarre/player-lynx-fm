@@ -71,6 +71,10 @@ find $APP_DIR -type f -name "*.js" | while read -r file; do
   if [ ! -z "$VITE_API_BASE_URL" ]; then
     sed -i "s|VITE_API_BASE_URL_PLACEHOLDER|$VITE_API_BASE_URL|g" $file
     sed -i "s|\"VITE_API_BASE_URL\"|\"$VITE_API_BASE_URL\"|g" $file
+    
+    # Explicitly replace any hardcoded URLs with the correct one
+    sed -i "s|http://go.lynx.fm:3500|$VITE_API_BASE_URL|g" $file
+    sed -i "s|https://go.lynx.fm:3500|$VITE_API_BASE_URL|g" $file
   fi
 done
 
