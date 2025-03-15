@@ -34,9 +34,9 @@ echo "Updating config.js with environment values..."
 CONFIG_FILE="$APP_DIR/config.js"
 
 # Ensure we have default values if environment variables are not set
-SUPABASE_URL=${VITE_SUPABASE_URL:-""}
-SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY:-""}
-API_BASE_URL=${VITE_API_BASE_URL:-"https://go.lynx.fm"}
+SUPABASE_URL=${VITE_SUPABASE_URL}
+SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY}
+API_BASE_URL=${VITE_API_BASE_URL}
 
 # Log the actual values being used (without revealing sensitive info)
 echo "Using the following values:"
