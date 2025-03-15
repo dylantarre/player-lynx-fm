@@ -27,10 +27,13 @@ export function MusicPlayer() {
   const [lowFreq, setLowFreq] = useState(0);
   const [midFreq, setMidFreq] = useState(0);
   const [highFreq, setHighFreq] = useState(0);
+  const [isHovering, setIsHovering] = useState(false);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const audioRef = useRef<HTMLAudioElement>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const animationFrameRef = useRef<number>(0);
+  const containerRef = useRef<HTMLDivElement>(null);
   const { colorScheme, setColorScheme } = useContext(ColorSchemeContext);
   const navigate = useNavigate();
 
@@ -317,6 +320,22 @@ export function MusicPlayer() {
     };
   }, [audioObjectUrl]);
 
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!containerRef.current || !isHovering) return;
+    
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width - 0.5) * 2; // -1 to 1
+    const y = ((e.clientY - rect.top) / rect.height - 0.5) * 2; // -1 to 1
+    setMousePosition({ x, y });
+  };
+
+  const getParallaxTransform = (scale: number, rotate: number, strength: number) => {
+    if (!isHovering) return `scale(${scale}) rotate(${rotate}deg)`;
+    const moveX = mousePosition.x * strength;
+    const moveY = mousePosition.y * strength;
+    return `scale(${scale}) rotate(${rotate}deg) translate(${moveX}px, ${moveY}px)`;
+  };
+
   return (
     <div className={`min-h-screen bg-gradient-to-br ${colorScheme?.from} ${colorScheme?.via} ${colorScheme?.to} flex items-center justify-center p-4 relative overflow-hidden`}>
       {/* Ethereal background effects */}
@@ -356,21 +375,49 @@ export function MusicPlayer() {
             <div className="p-8">
               <div className="text-center mb-12">
                 <div 
-                  className="relative w-32 h-32 mx-auto mb-8"
-                  style={{ transform: `scale(${1 - (lowFreq / 1024) * 0.35}) rotate(${(lowFreq / 1024) * 2}deg)` }}
+                  ref={containerRef}
+                  className="relative w-32 h-32 mx-auto mb-8 transition-transform duration-200"
+                  onMouseEnter={() => setIsHovering(true)}
+                  onMouseLeave={() => setIsHovering(false)}
+                  onMouseMove={handleMouseMove}
+                  style={{ 
+                    transform: getParallaxTransform(
+                      1 - (lowFreq / 1024) * 0.35,
+                      (lowFreq / 1024) * 2,
+                      8
+                    )
+                  }}
                 >
                   <div 
-                    className={`absolute inset-0 bg-gradient-to-br ${colorScheme.accent1} ${colorScheme.accent3} animate-morph shadow-elevated`}
-                    style={{ transform: `scale(${1 + (midFreq / 720) * 0.65}) rotate(${(midFreq / 1024) * -3}deg)` }}
+                    className={`absolute inset-0 bg-gradient-to-br ${colorScheme.accent1} ${colorScheme.accent3} animate-morph shadow-elevated transition-transform duration-200`}
+                    style={{ 
+                      transform: getParallaxTransform(
+                        1 + (midFreq / 720) * 0.65,
+                        (midFreq / 1024) * -3,
+                        12
+                      )
+                    }}
                   ></div>
                   <div 
-                    className={`absolute inset-2 bg-gradient-to-br ${colorScheme.accent2} ${colorScheme.accent1} animate-morph-reverse shadow-elevated`}
-                    style={{ transform: `scale(${1 + (highFreq / 840) * 0.45}) rotate(${(highFreq / 1024) * 1.5}deg)` }}
+                    className={`absolute inset-2 bg-gradient-to-br ${colorScheme.accent2} ${colorScheme.accent1} animate-morph-reverse shadow-elevated transition-transform duration-200`}
+                    style={{ 
+                      transform: getParallaxTransform(
+                        1 + (highFreq / 840) * 0.45,
+                        (highFreq / 1024) * 1.5,
+                        16
+                      )
+                    }}
                   ></div>
                   <div className="absolute inset-4 rounded-full bg-gradient-to-br from-white/15 to-transparent backdrop-blur-sm flex items-center justify-center shadow-elevated">
                     <div 
-                      className={`w-16 h-16 rounded-full bg-gradient-to-br ${colorScheme.from.replace('from-', 'from-')}/80 ${colorScheme.via.replace('via-', 'to-')}/80 shadow-elevated`}
-                      style={{ transform: `scale(${1 + ((lowFreq + midFreq + highFreq) / (1024 * 3)) * 0.25})` }}
+                      className={`w-16 h-16 rounded-full bg-gradient-to-br ${colorScheme.from.replace('from-', 'from-')}/80 ${colorScheme.via.replace('via-', 'to-')}/80 shadow-elevated transition-transform duration-200`}
+                      style={{ 
+                        transform: getParallaxTransform(
+                          1 + ((lowFreq + midFreq + highFreq) / (1024 * 3)) * 0.25,
+                          0,
+                          20
+                        )
+                      }}
                     ></div>
                   </div>
                 </div>
