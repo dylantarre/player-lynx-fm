@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useContext } from 'react';
+import { useState, useRef, useEffect, useContext, useCallback } from 'react';
 import { Play, Pause, Square, Shuffle, LogOut, SwatchBook as Swatch, User, Music } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
@@ -25,6 +25,9 @@ export function MusicPlayer() {
   const [audioObjectUrl, setAudioObjectUrl] = useState<string | null>(null);
   const [recentTracks, setRecentTracks] = useState<string[]>([]);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const animationFrameRef = useRef<number>(0);
   const { colorScheme, setColorScheme } = useContext(ColorSchemeContext);
   const navigate = useNavigate();
 
@@ -236,6 +239,66 @@ export function MusicPlayer() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const average = (arr: Uint8Array) => {
+    return arr.reduce((a, b) => a + b, 0) / arr.length;
+  };
+
+  // Animate background based on audio frequencies
+  const startAnimation = useCallback(() => {
+    if (!analyserRef.current) return;
+
+    const animate = () => {
+      const bufferLength = analyserRef.current!.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+      analyserRef.current!.getByteFrequencyData(dataArray);
+
+      // Calculate average frequency values for low, mid, and high ranges
+      const lowFreq = average(dataArray.slice(0, 10));
+      const midFreq = average(dataArray.slice(10, 20));
+      const highFreq = average(dataArray.slice(20, 30));
+
+      // Update CSS variables for animation
+      if (document.documentElement) {
+        document.documentElement.style.setProperty('--morph-scale-1', `${1 + (lowFreq / 255)}`)
+        document.documentElement.style.setProperty('--morph-scale-2', `${1 + (midFreq / 255)}`)
+        document.documentElement.style.setProperty('--morph-scale-3', `${1 + (highFreq / 255)}`)
+      }
+
+      animationFrameRef.current = requestAnimationFrame(animate);
+    };
+
+    animate();
+  }, []);
+
+  // Initialize audio context and analyzer
+  useEffect(() => {
+    if (!audioRef.current) return;
+
+    const audio = audioRef.current;
+    const initAudioContext = () => {
+      if (!audioContextRef.current) {
+        audioContextRef.current = new AudioContext();
+        analyserRef.current = audioContextRef.current.createAnalyser();
+        analyserRef.current.fftSize = 256;
+        
+        const source = audioContextRef.current.createMediaElementSource(audio);
+        source.connect(analyserRef.current);
+        analyserRef.current.connect(audioContextRef.current.destination);
+      }
+    };
+
+    const handlePlay = () => {
+      initAudioContext();
+      startAnimation();
+    };
+
+    audio.addEventListener('play', handlePlay);
+    return () => {
+      audio.removeEventListener('play', handlePlay);
+      cancelAnimationFrame(animationFrameRef.current);
+    };
+  }, [startAnimation]);
+
   // Clean up object URL when component unmounts
   useEffect(() => {
     return () => {
@@ -249,9 +312,9 @@ export function MusicPlayer() {
     <div className={`min-h-screen bg-gradient-to-br ${colorScheme?.from} ${colorScheme?.via} ${colorScheme?.to} flex items-center justify-center p-4 relative overflow-hidden`}>
       {/* Ethereal background effects */}
       <div className="absolute inset-0">
-        <div className={`absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-br ${colorScheme?.accent1} rounded-full filter blur-3xl animate-pulse-slow`}></div>
-        <div className={`absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-br ${colorScheme?.accent2} rounded-full filter blur-3xl animate-pulse-slow delay-1000`}></div>
-        <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br ${colorScheme?.accent3} rounded-full filter blur-3xl animate-float`}></div>
+        <div className={`absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-br ${colorScheme.accent1} rounded-full filter blur-3xl animate-pulse-slow`}></div>
+        <div className={`absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-br ${colorScheme.accent2} rounded-full filter blur-3xl animate-pulse-slow delay-1000`}></div>
+        <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br ${colorScheme.accent3} rounded-full filter blur-3xl animate-float`}></div>
       </div>
       
       {/* Color scheme button */}
@@ -272,119 +335,127 @@ export function MusicPlayer() {
         {currentView === 'player' ? <User className="w-5 h-5" /> : <Music className="w-5 h-5" />}
       </button>
       
-      <div className="max-w-md w-full bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-xl rounded-3xl shadow-elevated overflow-hidden border border-white/20 transition-all hover:shadow-elevated-hover">
-        {currentView === 'player' ? (
-          <div className="p-8">
-            <div className="text-center mb-12">
-            <div className="relative w-32 h-32 mx-auto mb-8">
-              <div className={`absolute inset-0 bg-gradient-to-br ${colorScheme.accent1} ${colorScheme.accent3} animate-morph shadow-elevated`}></div>
-              <div className={`absolute inset-2 bg-gradient-to-br ${colorScheme.accent2} ${colorScheme.accent1} animate-morph-reverse shadow-elevated`}></div>
-              <div className="absolute inset-4 rounded-full bg-gradient-to-br from-white/15 to-transparent backdrop-blur-sm flex items-center justify-center shadow-elevated">
-                <div className={`w-16 h-16 rounded-full bg-gradient-to-br ${colorScheme.from.replace('from-', 'from-')}/80 ${colorScheme.via.replace('via-', 'to-')}/80 shadow-elevated`} />
+      <div className="max-w-md w-full bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-xl rounded-3xl shadow-elevated overflow-hidden border border-white/20 transition-all hover:shadow-elevated-hover relative">
+        {/* Morphing background effect */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className={`absolute -inset-1/2 w-[200%] h-[200%] bg-gradient-to-br ${colorScheme.accent1} rounded-full filter blur-3xl opacity-30 scale-[var(--morph-scale-1)]`}></div>
+        </div>
+        
+        {/* Player content */}
+        <div className="relative z-10">
+          {currentView === 'player' ? (
+            <div className="p-8">
+              <div className="text-center mb-12">
+              <div className="relative w-32 h-32 mx-auto mb-8">
+                <div className={`absolute inset-0 bg-gradient-to-br ${colorScheme.accent1} ${colorScheme.accent3} animate-morph shadow-elevated`}></div>
+                <div className={`absolute inset-2 bg-gradient-to-br ${colorScheme.accent2} ${colorScheme.accent1} animate-morph-reverse shadow-elevated`}></div>
+                <div className="absolute inset-4 rounded-full bg-gradient-to-br from-white/15 to-transparent backdrop-blur-sm flex items-center justify-center shadow-elevated">
+                  <div className={`w-16 h-16 rounded-full bg-gradient-to-br ${colorScheme.from.replace('from-', 'from-')}/80 ${colorScheme.via.replace('via-', 'to-')}/80 shadow-elevated`} />
+                </div>
               </div>
-            </div>
-            <div className="uppercase tracking-wider text-sm text-teal-300 font-bold mb-2">
-              Now Playing
-            </div>
-            <h2 className="text-3xl font-bold text-white mb-2">
-              {isLoading ? 'Loading...' : (currentTrack?.title || 'Select a Track')}
-            </h2>
-            <p className="text-emerald-200/80 font-medium">
-              {currentTrack?.artist || ''}
-            </p>
-            {serverStatus === false && (
-              <p className="text-red-400 mt-2">Server connection error</p>
-            )}
-            </div>
-          
-            <div className="flex justify-center space-x-6">
-            <button
-              onClick={togglePlay}
-              disabled={!currentTrack || isLoading}
-              className={`p-4 rounded-full bg-gradient-to-r ${colorScheme.from.replace('from-', 'from-')}/80 ${colorScheme.via.replace('via-', 'to-')}/80 text-white hover:${colorScheme.from.replace('from-', 'from-')}/60 hover:${colorScheme.via.replace('via-', 'to-')}/60 transition-all shadow-elevated hover:shadow-elevated-hover backdrop-blur-sm hover:-translate-y-0.5 ${(!currentTrack || isLoading) ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-              {isPlaying ? (
-                <Pause className="w-8 h-8" />
-              ) : (
-                <Play className="w-8 h-8" />
+              <div className="uppercase tracking-wider text-sm text-teal-300 font-bold mb-2">
+                Now Playing
+              </div>
+              <h2 className="text-3xl font-bold text-white mb-2">
+                {isLoading ? 'Loading...' : (currentTrack?.title || 'Select a Track')}
+              </h2>
+              <p className="text-emerald-200/80 font-medium">
+                {currentTrack?.artist || ''}
+              </p>
+              {serverStatus === false && (
+                <p className="text-red-400 mt-2">Server connection error</p>
               )}
-            </button>
+              </div>
             
-            <button
-              onClick={stopPlay}
-              disabled={!currentTrack || isLoading}
-              className={`p-4 rounded-full bg-gradient-to-r ${colorScheme.via.replace('via-', 'from-')}/80 ${colorScheme.to.replace('to-', 'to-')}/80 text-white hover:${colorScheme.via.replace('via-', 'from-')}/60 hover:${colorScheme.to.replace('to-', 'to-')}/60 transition-all shadow-elevated hover:shadow-elevated-hover backdrop-blur-sm hover:-translate-y-0.5 ${(!currentTrack || isLoading) ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-              <Square className="w-8 h-8" />
-            </button>
-            
-            <button
-              onClick={playRandom}
-              disabled={isLoading || serverStatus === false}
-              className={`p-4 rounded-full bg-gradient-to-r ${colorScheme.from.replace('from-', 'from-')}/80 ${colorScheme.to.replace('to-', 'to-')}/80 text-white hover:${colorScheme.from.replace('from-', 'from-')}/60 hover:${colorScheme.to.replace('to-', 'to-')}/60 transition-all shadow-elevated hover:shadow-elevated-hover backdrop-blur-sm hover:-translate-y-0.5 ${(isLoading || serverStatus === false) ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-              {isLoading ? (
-                <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-              ) : (
-                <Shuffle className="w-8 h-8" />
-              )}
-            </button>
-            </div>
-            
-            <audio
-              ref={audioRef}
-              onEnded={() => setIsPlaying(false)}
-              src={currentTrack?.url || ''}
-              preload="auto"
-              onError={(e) => console.error('Audio error:', e)}
-            />
-          </div>
-        ) : (
-          <div className="p-8">
-            <div className="flex justify-end mb-4">
+              <div className="flex justify-center space-x-6">
               <button
-                onClick={handleLogout}
-                className="flex items-center text-white/70 hover:text-red-400 transition-colors"
+                onClick={togglePlay}
+                disabled={!currentTrack || isLoading}
+                className={`p-4 rounded-full bg-gradient-to-r ${colorScheme.from.replace('from-', 'from-')}/80 ${colorScheme.via.replace('via-', 'to-')}/80 text-white hover:${colorScheme.from.replace('from-', 'from-')}/60 hover:${colorScheme.via.replace('via-', 'to-')}/60 transition-all shadow-elevated hover:shadow-elevated-hover backdrop-blur-sm hover:-translate-y-0.5 ${(!currentTrack || isLoading) ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
-                <LogOut className="w-5 h-5 mr-1" />
-                <span>Logout</span>
+                {isPlaying ? (
+                  <Pause className="w-8 h-8" />
+                ) : (
+                  <Play className="w-8 h-8" />
+                )}
               </button>
-            </div>
-            <div className="flex items-center justify-center mb-8">
-              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-500/80 to-indigo-500/80 flex items-center justify-center shadow-elevated">
-                <User className="w-12 h-12 text-white" />
+              
+              <button
+                onClick={stopPlay}
+                disabled={!currentTrack || isLoading}
+                className={`p-4 rounded-full bg-gradient-to-r ${colorScheme.via.replace('via-', 'from-')}/80 ${colorScheme.to.replace('to-', 'to-')}/80 text-white hover:${colorScheme.via.replace('via-', 'from-')}/60 hover:${colorScheme.to.replace('to-', 'to-')}/60 transition-all shadow-elevated hover:shadow-elevated-hover backdrop-blur-sm hover:-translate-y-0.5 ${(!currentTrack || isLoading) ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                <Square className="w-8 h-8" />
+              </button>
+              
+              <button
+                onClick={playRandom}
+                disabled={isLoading || serverStatus === false}
+                className={`p-4 rounded-full bg-gradient-to-r ${colorScheme.from.replace('from-', 'from-')}/80 ${colorScheme.to.replace('to-', 'to-')}/80 text-white hover:${colorScheme.from.replace('from-', 'from-')}/60 hover:${colorScheme.to.replace('to-', 'to-')}/60 transition-all shadow-elevated hover:shadow-elevated-hover backdrop-blur-sm hover:-translate-y-0.5 ${(isLoading || serverStatus === false) ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                {isLoading ? (
+                  <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                ) : (
+                  <Shuffle className="w-8 h-8" />
+                )}
+              </button>
               </div>
+              
+              <audio
+                ref={audioRef}
+                onEnded={() => setIsPlaying(false)}
+                src={currentTrack?.url || ''}
+                preload="auto"
+                onError={(e) => console.error('Audio error:', e)}
+              />
             </div>
-
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-white/60 mb-2">Email</label>
-                <div className="text-white font-medium">{userData.email}</div>
+          ) : (
+            <div className="p-8">
+              <div className="flex justify-end mb-4">
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center text-white/70 hover:text-red-400 transition-colors"
+                >
+                  <LogOut className="w-5 h-5 mr-1" />
+                  <span>Logout</span>
+                </button>
               </div>
-
-              <div>
-                <label className="block text-sm font-medium text-white/60 mb-2">Member Since</label>
-                <div className="text-white font-medium">
-                  {userData.created_at ? new Date(userData.created_at).toLocaleDateString() : ''}
+              <div className="flex items-center justify-center mb-8">
+                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-500/80 to-indigo-500/80 flex items-center justify-center shadow-elevated">
+                  <User className="w-12 h-12 text-white" />
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-white/10">
-                <h3 className="text-lg font-semibold text-white mb-4">Preferences</h3>
-                <div className="space-y-4">
-                  <label className="flex items-center space-x-3">
-                    <input type="checkbox" className="rounded bg-white/10 border-white/20" />
-                    <span className="text-white">Enable notifications</span>
-                  </label>
-                  <label className="flex items-center space-x-3">
-                    <input type="checkbox" className="rounded bg-white/10 border-white/20" />
-                    <span className="text-white">Auto-play next track</span>
-                  </label>
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-white/60 mb-2">Email</label>
+                  <div className="text-white font-medium">{userData.email}</div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-white/60 mb-2">Member Since</label>
+                  <div className="text-white font-medium">
+                    {userData.created_at ? new Date(userData.created_at).toLocaleDateString() : ''}
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-white/10">
+                  <h3 className="text-lg font-semibold text-white mb-4">Preferences</h3>
+                  <div className="space-y-4">
+                    <label className="flex items-center space-x-3">
+                      <input type="checkbox" className="rounded bg-white/10 border-white/20" />
+                      <span className="text-white">Enable notifications</span>
+                    </label>
+                    <label className="flex items-center space-x-3">
+                      <input type="checkbox" className="rounded bg-white/10 border-white/20" />
+                      <span className="text-white">Auto-play next track</span>
+                    </label>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
