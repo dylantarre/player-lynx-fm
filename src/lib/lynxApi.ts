@@ -7,11 +7,37 @@ interface WindowWithEnv extends Window {
     VITE_SUPABASE_ANON_KEY?: string;
     VITE_API_BASE_URL?: string;
   };
+  LYNX_CONFIG?: {
+    VITE_SUPABASE_URL?: string;
+    VITE_SUPABASE_ANON_KEY?: string;
+    VITE_API_BASE_URL?: string;
+  };
 }
 
-// Try to get environment variables from window.ENV first (for production)
-// then fall back to import.meta.env (for development)
-const API_BASE_URL = ((window as WindowWithEnv).ENV?.VITE_API_BASE_URL) || import.meta.env.VITE_API_BASE_URL || 'https://go.lynx.fm';
+// Add debugging for configuration sources
+console.log('🔍 LynxFM: Checking for configuration sources...');
+if ((window as WindowWithEnv).ENV) {
+  console.log('✅ LynxFM: Found ENV in window object');
+}
+if ((window as WindowWithEnv).LYNX_CONFIG) {
+  console.log('✅ LynxFM: Found LYNX_CONFIG in window object');
+}
+
+// Try to get environment variables from various sources
+const API_BASE_URL = 
+  ((window as WindowWithEnv).LYNX_CONFIG?.VITE_API_BASE_URL) || 
+  ((window as WindowWithEnv).ENV?.VITE_API_BASE_URL) || 
+  import.meta.env.VITE_API_BASE_URL || 
+  'https://go.lynx.fm';
+
+// Log configuration status
+console.log('=================================================');
+console.log('📱 LynxFM Configuration Status:');
+console.log('=================================================');
+console.log('Supabase URL:', ((window as WindowWithEnv).ENV?.VITE_SUPABASE_URL || (window as WindowWithEnv).LYNX_CONFIG?.VITE_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL) ? '✅ Set' : '❌ Not Set');
+console.log('Supabase Anon Key:', ((window as WindowWithEnv).ENV?.VITE_SUPABASE_ANON_KEY || (window as WindowWithEnv).LYNX_CONFIG?.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY) ? '✅ Set' : '❌ Not Set');
+console.log('API Base URL:', API_BASE_URL ? `✅ Set (${API_BASE_URL})` : '❌ Not Set');
+console.log('=================================================');
 
 // Helper function to ensure proper URL construction
 const buildUrl = (path: string): string => {
@@ -19,42 +45,31 @@ const buildUrl = (path: string): string => {
   const cleanPath = path.startsWith('/') ? path.substring(1) : path;
   
   try {
-    // Make sure the API_BASE_URL is valid
+    // Don't use URL constructor, use simple string concatenation
     let baseUrl = API_BASE_URL;
     
-    // Ensure the base URL has a protocol
-    if (!baseUrl.startsWith('http://') && !baseUrl.startsWith('https://')) {
-      baseUrl = 'https://' + baseUrl;
-    }
-    
-    // Ensure the base URL ends with a slash for proper path joining
-    if (!baseUrl.endsWith('/')) {
-      baseUrl = baseUrl + '/';
+    // Remove trailing slash from base URL if present
+    if (baseUrl.endsWith('/')) {
+      baseUrl = baseUrl.slice(0, -1);
     }
     
     // For debugging
-    console.log('Building URL with base:', baseUrl, 'and path:', cleanPath);
+    console.log('🔗 Building URL:', `${baseUrl}/${cleanPath}`);
     
-    // Create a URL object to properly handle URL construction
-    const url = new URL(cleanPath, baseUrl);
-    return url.toString();
+    // Simple string concatenation instead of URL constructor
+    return `${baseUrl}/${cleanPath}`;
   } catch (error) {
-    console.error('Error building URL:', error);
+    console.error('❌ Error building URL:', error);
     
     // Fallback method for URL construction
     let baseUrl = API_BASE_URL;
     
-    // Ensure the base URL has a protocol
-    if (!baseUrl.startsWith('http://') && !baseUrl.startsWith('https://')) {
-      baseUrl = 'https://' + baseUrl;
+    // Remove trailing slash from base URL if present
+    if (baseUrl.endsWith('/')) {
+      baseUrl = baseUrl.slice(0, -1);
     }
     
-    // Ensure the base URL ends with a slash for proper path joining
-    if (!baseUrl.endsWith('/')) {
-      baseUrl = baseUrl + '/';
-    }
-    
-    return baseUrl + cleanPath;
+    return `${baseUrl}/${cleanPath}`;
   }
 };
 
