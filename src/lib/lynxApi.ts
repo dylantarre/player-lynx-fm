@@ -1,6 +1,21 @@
 import { supabase } from './supabase';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://go.lynx.fm:3500';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://go.lynx.fm';
+
+// Helper function to ensure proper URL construction
+const buildUrl = (path: string): string => {
+  // Remove leading slash from path if present
+  const cleanPath = path.startsWith('/') ? path.substring(1) : path;
+  
+  try {
+    // Create a URL object to properly handle URL construction
+    const url = new URL(cleanPath, API_BASE_URL);
+    return url.toString();
+  } catch (error) {
+    console.error('Error building URL:', error);
+    return `${API_BASE_URL}/${cleanPath}`;
+  }
+};
 
 // Define types
 export interface Track {
@@ -32,7 +47,7 @@ export const lynxApi = {
   async healthCheck(): Promise<boolean> {
     try {
       console.log('Checking server health...');
-      const response = await fetch(`${API_BASE_URL}/health`);
+      const response = await fetch(buildUrl('/health'));
       const isHealthy = response.ok;
       console.log('Server health status:', isHealthy);
       return isHealthy;
@@ -45,7 +60,7 @@ export const lynxApi = {
   async getRandomTrackId(): Promise<string | null> {
     try {
       console.log('Fetching random track ID...');
-      const response = await fetch(`${API_BASE_URL}/random`);
+      const response = await fetch(buildUrl('/random'));
       if (!response.ok) {
         throw new Error(`Failed to get random track: ${response.status}`);
       }
@@ -68,7 +83,7 @@ export const lynxApi = {
 
     try {
       console.log('Fetching user info...');
-      const response = await fetch(`${API_BASE_URL}/me`, {
+      const response = await fetch(buildUrl('/me'), {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -89,7 +104,7 @@ export const lynxApi = {
 
   async getTrackUrl(trackId: string): Promise<string> {
     // This returns the URL to the track, which will require authentication when accessed
-    return `${API_BASE_URL}/tracks/${trackId}`;
+    return buildUrl(`/tracks/${trackId}`);
   },
 
   async prefetchTracks(trackIds: string[]): Promise<PrefetchResponse | null> {
@@ -101,7 +116,7 @@ export const lynxApi = {
 
     try {
       console.log('Prefetching tracks:', trackIds);
-      const response = await fetch(`${API_BASE_URL}/prefetch`, {
+      const response = await fetch(buildUrl('/prefetch'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -133,10 +148,10 @@ export const lynxApi = {
     }
     
     try {
-      console.log(`Making authenticated request to ${API_BASE_URL}/tracks/${trackId}`);
+      console.log(`Making authenticated request to ${buildUrl(`/tracks/${trackId}`)}`);
       console.log(`Using token: ${token.substring(0, 10)}...`);
       
-      const response = await fetch(`${API_BASE_URL}/tracks/${trackId}`, {
+      const response = await fetch(buildUrl(`/tracks/${trackId}`), {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -165,7 +180,7 @@ export const lynxApi = {
     const token = await getAuthToken();
     
     return {
-      url: `${API_BASE_URL}/tracks/${trackId}`,
+      url: buildUrl(`/tracks/${trackId}`),
       token
     };
   }
