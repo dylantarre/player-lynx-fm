@@ -1,6 +1,6 @@
 import { supabase } from './supabase';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://go.lynx.fm:3500';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://go.lynx.fm:3500';
 
 // Define types
 export interface Track {
