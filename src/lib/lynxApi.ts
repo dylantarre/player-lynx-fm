@@ -32,7 +32,7 @@ const API_BASE_URL =
   ((window as WindowWithEnv).ENV?.VITE_API_BASE_URL) || 
   (window as WindowWithEnv).VITE_API_BASE_URL || 
   import.meta.env.VITE_API_BASE_URL || 
-  'https://go.lynx.fm';
+  'https://go.lynx.fm:3500';
 
 // Log configuration status
 console.log('=================================================');
@@ -49,12 +49,13 @@ function buildUrl(path: string): string {
   const apiBaseUrl = (window as WindowWithEnv).ENV?.VITE_API_BASE_URL || 
                     (window as WindowWithEnv).LYNX_CONFIG?.VITE_API_BASE_URL || 
                     (window as WindowWithEnv).VITE_API_BASE_URL || 
-                    'https://go.lynx.fm:3500';  // Always use HTTPS
+                    import.meta.env.VITE_API_BASE_URL ||
+                    'https://go.lynx.fm:3500';  // Always use HTTPS with port
 
   // Ensure path starts with /
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
   
-  // Ensure no double slashes
+  // Ensure no double slashes and return full URL
   return `${apiBaseUrl.replace(/\/$/, '')}${normalizedPath}`;
 }
 
