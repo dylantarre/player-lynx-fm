@@ -107,8 +107,8 @@ export const lynxApi = {
         throw new Error(`Failed to get random track: ${response.status}`);
       }
       const data = await response.json();
-      console.log('Random track ID received:', data.track_id);
-      return data.track_id;
+      console.log('Random track ID received:', data.id);
+      return data.id;
     } catch (error) {
       console.error('Failed to get random track:', error);
       return null;
