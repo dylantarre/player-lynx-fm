@@ -12,6 +12,9 @@ interface WindowWithEnv extends Window {
     VITE_SUPABASE_ANON_KEY?: string;
     VITE_API_BASE_URL?: string;
   };
+  VITE_SUPABASE_URL?: string;
+  VITE_SUPABASE_ANON_KEY?: string;
+  VITE_API_BASE_URL?: string;
 }
 
 // Add debugging for configuration sources
@@ -27,6 +30,7 @@ if ((window as WindowWithEnv).LYNX_CONFIG) {
 const API_BASE_URL = 
   ((window as WindowWithEnv).LYNX_CONFIG?.VITE_API_BASE_URL) || 
   ((window as WindowWithEnv).ENV?.VITE_API_BASE_URL) || 
+  (window as WindowWithEnv).VITE_API_BASE_URL || 
   import.meta.env.VITE_API_BASE_URL || 
   'https://go.lynx.fm';
 
@@ -34,30 +38,25 @@ const API_BASE_URL =
 console.log('=================================================');
 console.log('📱 LynxFM Configuration Status:');
 console.log('=================================================');
-console.log('Supabase URL:', ((window as WindowWithEnv).ENV?.VITE_SUPABASE_URL || (window as WindowWithEnv).LYNX_CONFIG?.VITE_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL) ? '✅ Set' : '❌ Not Set');
-console.log('Supabase Anon Key:', ((window as WindowWithEnv).ENV?.VITE_SUPABASE_ANON_KEY || (window as WindowWithEnv).LYNX_CONFIG?.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY) ? '✅ Set' : '❌ Not Set');
+console.log('Supabase URL:', ((window as WindowWithEnv).ENV?.VITE_SUPABASE_URL || (window as WindowWithEnv).LYNX_CONFIG?.VITE_SUPABASE_URL || (window as WindowWithEnv).VITE_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL) ? '✅ Set' : '❌ Not Set');
+console.log('Supabase Anon Key:', ((window as WindowWithEnv).ENV?.VITE_SUPABASE_ANON_KEY || (window as WindowWithEnv).LYNX_CONFIG?.VITE_SUPABASE_ANON_KEY || (window as WindowWithEnv).VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY) ? '✅ Set' : '❌ Not Set');
 console.log('API Base URL:', API_BASE_URL ? `✅ Set (${API_BASE_URL})` : '❌ Not Set');
 console.log('=================================================');
 
 // Helper function to ensure proper URL construction
-const buildUrl = (path: string): string => {
-  // Remove leading slash from path if present
-  const cleanPath = path.startsWith('/') ? path.substring(1) : path;
+function buildUrl(path: string): string {
+  // Try to get API base URL from various sources
+  const apiBaseUrl = (window as WindowWithEnv).ENV?.VITE_API_BASE_URL || 
+                    (window as WindowWithEnv).LYNX_CONFIG?.VITE_API_BASE_URL || 
+                    (window as WindowWithEnv).VITE_API_BASE_URL || 
+                    'https://go.lynx.fm:3500';  // Always use HTTPS
+
+  // Ensure path starts with /
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
   
-  // Don't use URL constructor at all, use simple string concatenation
-  let baseUrl = API_BASE_URL;
-  
-  // Remove trailing slash from base URL if present
-  if (baseUrl.endsWith('/')) {
-    baseUrl = baseUrl.slice(0, -1);
-  }
-  
-  // For debugging
-  console.log('🔗 Building URL:', `${baseUrl}/${cleanPath}`);
-  
-  // Simple string concatenation
-  return `${baseUrl}/${cleanPath}`;
-};
+  // Ensure no double slashes
+  return `${apiBaseUrl.replace(/\/$/, '')}${normalizedPath}`;
+}
 
 // Define types
 export interface Track {
