@@ -1,11 +1,16 @@
 import { useState, useRef, useEffect, useContext, useCallback } from 'react';
-import { Play, Pause, Square, Shuffle, LogOut, SwatchBook as Swatch, User, Music } from 'lucide-react';
+import { LogOut, SwatchBook as Swatch, User, Music } from 'lucide-react';
 import { signOut, getStoredAuth } from '../lib/auth';
 import { useNavigate } from 'react-router-dom';
 import { ColorSchemeContext } from '../App';
 import { lynxApi } from '../lib/lynxApi';
 import { LynxCat } from './LynxCat';
 import { Wubble } from './Wubble';
+import { PlayerCard } from './PlayerCard';
+import { PlayButton } from './PlayButton';
+import { ControlButton } from './ControlButton';
+import { StatusBadge } from './StatusBadge';
+import { TrackInfo } from './TrackInfo';
 
 type View = 'player' | 'profile';
 
@@ -369,14 +374,7 @@ export function MusicPlayer() {
       </button>
 
       <div className="flex items-center justify-center min-h-screen p-4">
-        <div className="max-w-md w-full bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-xl rounded-3xl shadow-elevated overflow-hidden border border-white/20 transition-all hover:shadow-elevated-hover relative">
-          {/* Morphing background effect */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className={`absolute -inset-1/2 w-[200%] h-[200%] bg-gradient-to-br ${colorScheme.accent1} rounded-full filter blur-3xl opacity-30 scale-[var(--morph-scale-1)]`}></div>
-          </div>
-          
-          {/* Player content */}
-          <div className="relative z-10">
+        <PlayerCard colorScheme={colorScheme}>
             {currentView === 'player' ? (
               <div className="p-8">
                 <div className="text-center mb-12">
@@ -389,54 +387,44 @@ export function MusicPlayer() {
                       size="lg"
                     />
                   </div>
-                <div className="uppercase tracking-wider text-sm text-teal-300 font-sans font-bold mb-2">
-                  {isPlaying ? 'Now Playing' : isStopped ? 'Stopped' : 'Paused'}
+                  <div className="mb-2">
+                    <StatusBadge
+                      status={isPlaying ? 'playing' : isStopped ? 'stopped' : 'paused'}
+                    />
+                  </div>
+                  <TrackInfo
+                    title={currentTrack?.title || ''}
+                    artist={currentTrack?.artist}
+                    loading={isLoading}
+                  />
+                  {serverStatus === false && (
+                    <p className="text-red-400 mt-2">Server connection error</p>
+                  )}
                 </div>
-                <h2 className="text-3xl text-white font-sans font-bold mb-2">
-                  {isLoading ? 'Loading...' : (currentTrack?.title || 'Select a Track')}
-                </h2>
-                <p className="text-emerald-200/80 font-sans">
-                  {currentTrack?.artist || ''}
-                </p>
-                {serverStatus === false && (
-                  <p className="text-red-400 mt-2">Server connection error</p>
-                )}
-                </div>
-              
+
                 <div className="flex justify-center space-x-6">
-                <button
-                  onClick={togglePlay}
-                  disabled={!currentTrack || isLoading}
-                  className={`p-4 rounded-full bg-gradient-to-r ${colorScheme.from.replace('from-', 'from-')}/80 ${colorScheme.via.replace('via-', 'to-')}/80 text-white hover:${colorScheme.from.replace('from-', 'from-')}/60 hover:${colorScheme.via.replace('via-', 'to-')}/60 transition-all shadow-elevated hover:shadow-elevated-hover backdrop-blur-sm hover:-translate-y-0.5 border border-white/20`}
-                >
-                  {isPlaying ? (
-                    <Pause className="w-8 h-8" />
-                  ) : (
-                    <Play className="w-8 h-8" />
-                  )}
-                </button>
-                
-                <button
-                  onClick={stopPlay}
-                  disabled={!currentTrack || isLoading}
-                  className={`p-4 rounded-full bg-gradient-to-r ${colorScheme.via.replace('via-', 'from-')}/80 ${colorScheme.to.replace('to-', 'to-')}/80 text-white hover:${colorScheme.via.replace('via-', 'from-')}/60 hover:${colorScheme.to.replace('to-', 'to-')}/60 transition-all shadow-elevated hover:shadow-elevated-hover backdrop-blur-sm hover:-translate-y-0.5 border border-white/20`}
-                >
-                  <Square className="w-8 h-8" />
-                </button>
-                
-                <button
-                  onClick={playRandom}
-                  disabled={isLoading || serverStatus === false}
-                  className={`p-4 rounded-full bg-gradient-to-r ${colorScheme.from.replace('from-', 'from-')}/80 ${colorScheme.to.replace('to-', 'to-')}/80 text-white hover:${colorScheme.from.replace('from-', 'from-')}/60 hover:${colorScheme.to.replace('to-', 'to-')}/60 transition-all shadow-elevated hover:shadow-elevated-hover backdrop-blur-sm hover:-translate-y-0.5 border border-white/20`}
-                >
-                  {isLoading ? (
-                    <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  ) : (
-                    <Shuffle className="w-8 h-8" />
-                  )}
-                </button>
+                  <PlayButton
+                    isPlaying={isPlaying}
+                    onClick={togglePlay}
+                    disabled={!currentTrack || isLoading}
+                  />
+
+                  <ControlButton
+                    icon="stop"
+                    onClick={stopPlay}
+                    disabled={!currentTrack || isLoading}
+                    ariaLabel="Stop"
+                  />
+
+                  <ControlButton
+                    icon="shuffle"
+                    onClick={playRandom}
+                    disabled={isLoading || serverStatus === false}
+                    loading={isLoading}
+                    ariaLabel="Play random track"
+                  />
                 </div>
-                
+
                 <audio
                   ref={audioRef}
                   onEnded={() => setIsPlaying(false)}
@@ -491,8 +479,7 @@ export function MusicPlayer() {
                 </div>
               </div>
             )}
-          </div>
-        </div>
+        </PlayerCard>
       </div>
     </div>
   );

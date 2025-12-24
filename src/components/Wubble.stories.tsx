@@ -10,24 +10,33 @@ const meta: Meta<typeof Wubble> = {
     backgrounds: {
       default: 'dark',
     },
+    docs: {
+      description: {
+        component: 'An organic, audio-reactive visualization element that morphs and pulses in response to audio frequency data. The Wubble consists of layered gradients that independently react to bass, mid-range, and treble frequencies, creating a fluid, living visual.',
+      },
+    },
   },
   tags: ['autodocs'],
   argTypes: {
     lowFreq: {
       control: { type: 'range', min: 0, max: 255, step: 1 },
-      description: 'Low frequency (bass) - 0 to 255',
+      description: 'Controls the bass/drum response. Higher values cause the outer container to compress and rotate slightly, simulating the punch of low-end frequencies.',
     },
     midFreq: {
       control: { type: 'range', min: 0, max: 255, step: 1 },
-      description: 'Mid frequency (vocals) - 0 to 255',
+      description: 'Controls the mid-range response for vocals and instruments. Affects the outer morphing layer, making it expand and counter-rotate.',
     },
     highFreq: {
       control: { type: 'range', min: 0, max: 255, step: 1 },
-      description: 'High frequency (treble) - 0 to 255',
+      description: 'Controls the treble/cymbal response. Drives the inner morphing layer with subtle scaling and rotation for shimmer effects.',
     },
     size: {
       control: 'select',
       options: ['sm', 'md', 'lg', 'xl'],
+      description: 'Sets the overall dimensions of the Wubble. Sizes range from 64px (sm) to 192px (xl).',
+    },
+    colorScheme: {
+      description: 'Defines the gradient colors for each layer. Includes accent colors for the morphing layers and base colors for the inner core.',
     },
   },
 };
@@ -35,7 +44,6 @@ const meta: Meta<typeof Wubble> = {
 export default meta;
 type Story = StoryObj<typeof Wubble>;
 
-// Default static state
 export const Default: Story = {
   args: {
     lowFreq: 0,
@@ -43,15 +51,28 @@ export const Default: Story = {
     highFreq: 0,
     size: 'lg',
   },
+  parameters: {
+    docs: {
+      description: {
+        story: 'The Wubble at rest with no audio input. The base morphing animation still runs, but without any frequency-driven scaling or rotation.',
+      },
+    },
+  },
 };
 
-// Interactive with controls
 export const Interactive: Story = {
   args: {
     lowFreq: 128,
     midFreq: 100,
     highFreq: 80,
     size: 'lg',
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Use the Controls panel to manually adjust each frequency band and see how the Wubble responds. Try maxing out lowFreq to see the bass compression effect.',
+      },
+    },
   },
 };
 
@@ -94,15 +115,28 @@ const SimulatedAudioWubble = () => {
 
 export const SimulatedAudio: Story = {
   render: () => <SimulatedAudioWubble />,
+  parameters: {
+    docs: {
+      description: {
+        story: 'A live demo using simulated audio data. Sine waves at different frequencies drive each band, creating a continuous organic animation that mimics real music reactivity.',
+      },
+    },
+  },
 };
 
-// Size variants
 export const Small: Story = {
   args: {
     lowFreq: 80,
     midFreq: 60,
     highFreq: 40,
     size: 'sm',
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Compact 64px variant, ideal for tight spaces like list items or secondary UI elements.',
+      },
+    },
   },
 };
 
@@ -113,6 +147,13 @@ export const Medium: Story = {
     highFreq: 40,
     size: 'md',
   },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Mid-sized 96px variant, balanced for sidebars or smaller player interfaces.',
+      },
+    },
+  },
 };
 
 export const Large: Story = {
@@ -122,6 +163,13 @@ export const Large: Story = {
     highFreq: 40,
     size: 'lg',
   },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Standard 128px variant used in the main music player. Good balance of visibility and space.',
+      },
+    },
+  },
 };
 
 export const ExtraLarge: Story = {
@@ -130,6 +178,13 @@ export const ExtraLarge: Story = {
     midFreq: 60,
     highFreq: 40,
     size: 'xl',
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Hero-sized 192px variant for landing pages or fullscreen visualizer modes.',
+      },
+    },
   },
 };
 
@@ -169,6 +224,13 @@ export const OceanTheme: Story = {
     size: 'lg',
     colorScheme: oceanColorScheme,
   },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Cool blue and indigo palette evoking ocean depths. Works well with ambient, electronic, or chill music genres.',
+      },
+    },
+  },
 };
 
 export const SunsetTheme: Story = {
@@ -178,6 +240,13 @@ export const SunsetTheme: Story = {
     highFreq: 60,
     size: 'lg',
     colorScheme: sunsetColorScheme,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Warm orange and red palette inspired by golden hour. Pairs naturally with upbeat, energetic, or warm acoustic tracks.',
+      },
+    },
   },
 };
 
@@ -189,9 +258,15 @@ export const ForestTheme: Story = {
     size: 'lg',
     colorScheme: forestColorScheme,
   },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Natural green and teal palette with an earthy feel. Complements folk, nature sounds, or meditative audio.',
+      },
+    },
+  },
 };
 
-// High energy state
 export const HighEnergy: Story = {
   args: {
     lowFreq: 220,
@@ -199,14 +274,27 @@ export const HighEnergy: Story = {
     highFreq: 180,
     size: 'xl',
   },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Maximum intensity state simulating a loud, bass-heavy drop. All layers are fully expanded and rotating at peak values.',
+      },
+    },
+  },
 };
 
-// Calm state
 export const Calm: Story = {
   args: {
     lowFreq: 30,
     midFreq: 25,
     highFreq: 20,
     size: 'xl',
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Minimal activity state for quiet passages or ambient music. Subtle movement keeps the visualization alive without being distracting.',
+      },
+    },
   },
 };

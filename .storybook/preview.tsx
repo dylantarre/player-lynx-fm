@@ -1,6 +1,7 @@
 import type { Preview } from '@storybook/react-vite'
 import React from 'react'
 import { MemoryRouter } from 'react-router-dom'
+import { themes } from 'storybook/theming'
 import { ColorSchemeContext } from '../src/App'
 import '../src/index.css'
 import '../src/styles/global.css'
@@ -28,6 +29,9 @@ const preview: Preview = {
         { name: 'dark', value: '#0f172a' },
         { name: 'light', value: '#ffffff' },
       ],
+    },
+    docs: {
+      theme: themes.dark,
     },
     a11y: {
       // 'todo' - show a11y violations in the test UI only
