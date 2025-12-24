@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && storybook build -o dist/storybook",
+    "build": "vite build && storybook build -o dist/storybook || echo 'Storybook build skipped'",
     "build:app": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",

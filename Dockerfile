@@ -4,6 +4,9 @@ FROM node:20-alpine AS build
 # Set working directory
 WORKDIR /app
 
+# Skip Playwright browser download (not needed for static build)
+ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
+
 # Copy package files
 COPY package.json package-lock.json ./
 
