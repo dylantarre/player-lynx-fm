@@ -3,6 +3,7 @@ import React from 'react'
 import { MemoryRouter } from 'react-router-dom'
 import { ColorSchemeContext } from '../src/App'
 import '../src/index.css'
+import '../src/styles/global.css'
 
 const defaultColorScheme = {
   from: 'from-pink-950',
