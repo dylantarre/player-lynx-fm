@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { ColorSchemeContext } from '../App';
 import { lynxApi } from '../lib/lynxApi';
 import { LynxCat } from './LynxCat';
+import { Wubble } from './Wubble';
 
 type View = 'player' | 'profile';
 
@@ -379,24 +380,14 @@ export function MusicPlayer() {
             {currentView === 'player' ? (
               <div className="p-8">
                 <div className="text-center mb-12">
-                  <div
-                    className="relative w-32 h-32 mx-auto mb-8"
-                    style={{ transform: `scale(${1 - (lowFreq / 920) * 0.38}) rotate(${(lowFreq / 920) * 2.5}deg)` }}
-                  >
-                    <div
-                      className={`absolute inset-0 bg-gradient-to-br ${colorScheme.accent1} ${colorScheme.accent3} animate-morph shadow-elevated`}
-                      style={{ transform: `scale(${1 + (midFreq / 640) * 0.72}) rotate(${(midFreq / 920) * -4}deg)` }}
-                    ></div>
-                    <div
-                      className={`absolute inset-2 bg-gradient-to-br ${colorScheme.accent2} ${colorScheme.accent1} animate-morph-reverse shadow-elevated`}
-                      style={{ transform: `scale(${1 + (highFreq / 780) * 0.52}) rotate(${(highFreq / 920) * 2}deg)` }}
-                    ></div>
-                    <div className="absolute inset-4 rounded-full bg-gradient-to-br from-white/15 to-transparent backdrop-blur-sm flex items-center justify-center shadow-elevated">
-                      <div
-                        className={`w-16 h-16 rounded-full bg-gradient-to-br ${colorScheme.from.replace('from-', 'from-')}/80 ${colorScheme.via.replace('via-', 'to-')}/80 shadow-elevated`}
-                        style={{ transform: `scale(${1 + ((lowFreq + midFreq + highFreq) / (1024 * 3)) * 0.32})` }}
-                      ></div>
-                    </div>
+                  <div className="mb-8">
+                    <Wubble
+                      lowFreq={lowFreq}
+                      midFreq={midFreq}
+                      highFreq={highFreq}
+                      colorScheme={colorScheme}
+                      size="lg"
+                    />
                   </div>
                 <div className="uppercase tracking-wider text-sm text-teal-300 font-sans font-bold mb-2">
                   {isPlaying ? 'Now Playing' : isStopped ? 'Stopped' : 'Paused'}
