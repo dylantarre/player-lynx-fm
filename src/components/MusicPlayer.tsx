@@ -10,6 +10,7 @@ type View = 'player' | 'profile';
 
 export function MusicPlayer() {
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isStopped, setIsStopped] = useState(true);
   const [currentTrack, setCurrentTrack] = useState<{
     id: string;
     title: string;
@@ -103,6 +104,7 @@ export function MusicPlayer() {
         audioRef.current.play().catch(error => {
           console.error('Error playing audio:', error);
         });
+        setIsStopped(false);
       }
       setIsPlaying(!isPlaying);
     }
@@ -113,6 +115,7 @@ export function MusicPlayer() {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
       setIsPlaying(false);
+      setIsStopped(true);
     }
   };
 
@@ -210,6 +213,7 @@ export function MusicPlayer() {
               playPromise.then(() => {
                 console.log('Audio playback started successfully');
                 setIsPlaying(true);
+                setIsStopped(false);
               }).catch(error => {
                 console.error('Error playing audio:', error);
                 setIsPlaying(false);
@@ -273,9 +277,9 @@ export function MusicPlayer() {
         setHighFreq(highFreq);
         
         // Update morph background with varied effects
-        document.documentElement.style.setProperty('--morph-scale-1', `${1 + (lowFreq / 720) * 0.65}`)
-        document.documentElement.style.setProperty('--morph-scale-2', `${1 + (midFreq / 840) * 0.45}`)
-        document.documentElement.style.setProperty('--morph-scale-3', `${1 + (highFreq / 1024) * 0.25}`)
+        document.documentElement.style.setProperty('--morph-scale-1', `${1 + (lowFreq / 640) * 0.72}`)
+        document.documentElement.style.setProperty('--morph-scale-2', `${1 + (midFreq / 780) * 0.52}`)
+        document.documentElement.style.setProperty('--morph-scale-3', `${1 + (highFreq / 920) * 0.32}`)
       }
 
       animationFrameRef.current = requestAnimationFrame(animate);
@@ -375,27 +379,27 @@ export function MusicPlayer() {
             {currentView === 'player' ? (
               <div className="p-8">
                 <div className="text-center mb-12">
-                  <div 
+                  <div
                     className="relative w-32 h-32 mx-auto mb-8"
-                    style={{ transform: `scale(${1 - (lowFreq / 1024) * 0.35}) rotate(${(lowFreq / 1024) * 2}deg)` }}
+                    style={{ transform: `scale(${1 - (lowFreq / 920) * 0.38}) rotate(${(lowFreq / 920) * 2.5}deg)` }}
                   >
-                    <div 
+                    <div
                       className={`absolute inset-0 bg-gradient-to-br ${colorScheme.accent1} ${colorScheme.accent3} animate-morph shadow-elevated`}
-                      style={{ transform: `scale(${1 + (midFreq / 720) * 0.65}) rotate(${(midFreq / 1024) * -3}deg)` }}
+                      style={{ transform: `scale(${1 + (midFreq / 640) * 0.72}) rotate(${(midFreq / 920) * -4}deg)` }}
                     ></div>
-                    <div 
+                    <div
                       className={`absolute inset-2 bg-gradient-to-br ${colorScheme.accent2} ${colorScheme.accent1} animate-morph-reverse shadow-elevated`}
-                      style={{ transform: `scale(${1 + (highFreq / 840) * 0.45}) rotate(${(highFreq / 1024) * 1.5}deg)` }}
+                      style={{ transform: `scale(${1 + (highFreq / 780) * 0.52}) rotate(${(highFreq / 920) * 2}deg)` }}
                     ></div>
                     <div className="absolute inset-4 rounded-full bg-gradient-to-br from-white/15 to-transparent backdrop-blur-sm flex items-center justify-center shadow-elevated">
-                      <div 
+                      <div
                         className={`w-16 h-16 rounded-full bg-gradient-to-br ${colorScheme.from.replace('from-', 'from-')}/80 ${colorScheme.via.replace('via-', 'to-')}/80 shadow-elevated`}
-                        style={{ transform: `scale(${1 + ((lowFreq + midFreq + highFreq) / (1024 * 3)) * 0.25})` }}
+                        style={{ transform: `scale(${1 + ((lowFreq + midFreq + highFreq) / (1024 * 3)) * 0.32})` }}
                       ></div>
                     </div>
                   </div>
                 <div className="uppercase tracking-wider text-sm text-teal-300 font-sans font-bold mb-2">
-                  Now Playing
+                  {isPlaying ? 'Now Playing' : isStopped ? 'Stopped' : 'Paused'}
                 </div>
                 <h2 className="text-3xl text-white font-sans font-bold mb-2">
                   {isLoading ? 'Loading...' : (currentTrack?.title || 'Select a Track')}

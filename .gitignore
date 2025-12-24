@@ -37,3 +37,6 @@ dist-ssr
 .temp
 # Sensitive files
 src/lib/supabase.ts
+
+*storybook.log
+storybook-static
