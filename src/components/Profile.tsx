@@ -1,11 +1,11 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, User } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { getStoredAuth } from '../lib/auth';
 
 export function Profile() {
   const navigate = useNavigate();
-  const user = supabase.auth.getUser();
+  const { user } = getStoredAuth();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-900 to-slate-900 p-4">
@@ -28,14 +28,7 @@ export function Profile() {
           <div className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-white/60 mb-2">Email</label>
-              <div className="text-white font-medium">{user.email}</div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-white/60 mb-2">Member Since</label>
-              <div className="text-white font-medium">
-                {new Date(user.created_at).toLocaleDateString()}
-              </div>
+              <div className="text-white font-medium">{user?.email || 'Unknown'}</div>
             </div>
 
             <div className="pt-4 border-t border-white/10">

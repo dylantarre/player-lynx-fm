@@ -2,16 +2,13 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Auth } from './components/Auth';
 import { MusicPlayer } from './components/MusicPlayer';
 import { useEffect, useState, Suspense, createContext } from 'react';
-import { supabase } from './lib/supabase';
-import { User } from '@supabase/supabase-js';
+import { getStoredAuth, isAuthenticated, User } from './lib/auth';
 
 // Get default color scheme from environment
 declare global {
   interface Window {
     ENV?: {
       VITE_DEFAULT_COLOR_SCHEME?: string;
-      VITE_SUPABASE_URL?: string;
-      VITE_SUPABASE_ANON_KEY?: string;
       VITE_API_BASE_URL?: string;
     };
   }
@@ -90,19 +87,10 @@ function App() {
   const [colorScheme, setColorScheme] = useState(getDefaultColorScheme());
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
+    // Check for existing auth
+    const { user } = getStoredAuth();
+    setUser(user);
+    setLoading(false);
   }, []);
 
   if (loading) {
@@ -118,6 +106,8 @@ function App() {
     );
   }
 
+  const authenticated = isAuthenticated();
+
   return (
     <ColorSchemeContext.Provider value={{ colorScheme, setColorScheme }}>
       <div className="transition-colors duration-1000">
@@ -126,11 +116,11 @@ function App() {
             <Routes>
               <Route
                 path="/login"
-                element={user ? <Navigate to="/player" /> : <Auth />}
+                element={authenticated ? <Navigate to="/player" /> : <Auth />}
               />
               <Route
                 path="/player"
-                element={user ? <MusicPlayer /> : <Navigate to="/login" />}
+                element={authenticated ? <MusicPlayer /> : <Navigate to="/login" />}
               />
               <Route path="/" element={<Navigate to="/login" />} />
             </Routes>

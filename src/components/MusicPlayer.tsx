@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useContext, useCallback } from 'react';
 import { Play, Pause, Square, Shuffle, LogOut, SwatchBook as Swatch, User, Music } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { signOut, getStoredAuth } from '../lib/auth';
 import { useNavigate } from 'react-router-dom';
 import { ColorSchemeContext } from '../App';
 import { lynxApi } from '../lib/lynxApi';
@@ -90,8 +90,8 @@ export function MusicPlayer() {
     setColorScheme(nextScheme);
   };
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
+  const handleLogout = () => {
+    signOut();
     navigate('/login');
   };
 
@@ -233,11 +233,11 @@ export function MusicPlayer() {
   }, []);
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+    const fetchUserData = () => {
+      const { user } = getStoredAuth();
       setUserData({
         email: user?.email,
-        created_at: user?.created_at
+        created_at: undefined
       });
     };
     fetchUserData();

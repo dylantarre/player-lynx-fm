@@ -1,36 +1,37 @@
 import React, { useState } from 'react';
-import { supabase } from '../lib/supabase';
+import { signIn, signUp } from '../lib/auth';
 import { LogIn, UserPlus } from 'lucide-react';
 import { LynxCat } from './LynxCat';
 
-export function Auth() {
+interface AuthProps {
+  onAuthSuccess?: () => void;
+}
+
+export function Auth({ onAuthSuccess }: AuthProps) {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+
     try {
       setLoading(true);
       if (isSignUp) {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-        });
-        if (error) throw error;
+        await signUp(email, password);
       } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        if (error) throw error;
+        await signIn(email, password);
       }
-    } catch (error) {
-      if (error && typeof error === 'object' && 'message' in error) {
-        alert(error.message);
+      onAuthSuccess?.();
+      window.location.reload();
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
       } else {
-        alert('An error occurred during authentication');
+        setError('An error occurred during authentication');
       }
     } finally {
       setLoading(false);
@@ -53,7 +54,13 @@ export function Auth() {
             </div>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-6">
+          {error && (
+            <div className="mb-4 p-3 bg-red-500/20 border border-red-500/50 rounded-xl text-red-200 text-sm">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <input
                 className="w-full px-4 py-3 bg-white/10 rounded-xl border border-white/10 text-white font-sans placeholder:font-sans placeholder-white/50 focus:outline-none focus:border-amber-400/50"
@@ -61,6 +68,7 @@ export function Auth() {
                 placeholder="Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                required
               />
             </div>
             <div>
@@ -70,10 +78,13 @@ export function Auth() {
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={6}
               />
             </div>
             <div>
               <button
+                type="submit"
                 className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-amber-400 to-yellow-400 text-amber-950 rounded-xl font-sans font-bold hover:from-amber-300 hover:to-yellow-300 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-transparent disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                 disabled={loading}
               >
@@ -100,6 +111,32 @@ export function Auth() {
               className="text-white/70 hover:text-white transition-colors font-kaushan"
             >
               {isSignUp ? 'Already have an account? Sign In' : 'Need an account? Sign Up'}
+            </button>
+          </div>
+
+          <div className="mt-8 pt-6 border-t border-white/10">
+            <button
+              onClick={async () => {
+                setError(null);
+                setLoading(true);
+                try {
+                  await signIn('demo@lynx.fm', 'demo123');
+                  onAuthSuccess?.();
+                  window.location.reload();
+                } catch (err) {
+                  if (err instanceof Error) {
+                    setError(err.message);
+                  } else {
+                    setError('Demo login failed');
+                  }
+                } finally {
+                  setLoading(false);
+                }
+              }}
+              className="w-full px-4 py-3 bg-white/10 text-white/70 rounded-xl font-sans hover:bg-white/20 hover:text-white focus:outline-none transition-all disabled:opacity-50"
+              disabled={loading}
+            >
+              Try the Demo
             </button>
           </div>
         </div>
